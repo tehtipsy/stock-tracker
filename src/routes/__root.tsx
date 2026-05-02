@@ -4,17 +4,9 @@ import { DataContext } from '../context/DataContext'
 import { useStorage } from '../hooks/useStorage'
 import { useQuotes } from '../hooks/useQuotes'
 import { useDarkMode } from '../hooks/useDarkMode'
+import { dl } from '../lib/utils'
 import DEFAULTS from '../data/defaults'
 import type { Company, FinancialRow } from '../types'
-
-// CSV download helper (pure client, no server dependency)
-function dl(rows: (string | number)[][], fname: string): void {
-  const csv = rows.map(r => r.map(v => `"${String(v).replace(/"/g, '""')}"`).join(',')).join('\n')
-  const a = document.createElement('a')
-  a.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csv)
-  a.download = fname
-  a.click()
-}
 
 export default function RootLayout() {
   const routerState = useRouterState()
