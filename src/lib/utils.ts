@@ -2,6 +2,14 @@ import type { Company } from '../types'
 
 export const nid = (): number => Date.now() + Math.floor(Math.random() * 999)
 
+export function dl(rows: (string | number)[][], fname: string): void {
+  const csv = rows.map(r => r.map(v => `"${String(v).replace(/"/g, '""')}"`).join(',')).join('\n')
+  const a = document.createElement('a')
+  a.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csv)
+  a.download = fname
+  a.click()
+}
+
 export const fmt = (v: number | null | undefined, d = 1): string =>
   v == null ? '—' : parseFloat(String(v)).toFixed(d) + 'x'
 

@@ -29,13 +29,15 @@ The app is served at **http://localhost:5173**.
 
 > **Note:** In dev mode the browser calls `/api/quotes`, which is only available when deployed to Vercel or run via the [Vercel CLI](https://vercel.com/docs/cli) (`vercel dev`). Without it the live-data badge shows **live ✕** — the app still works with the static seed data.
 
-To also run the serverless API locally, install the Vercel CLI and use:
+For the full local app with the live `/api/quotes` function, use:
 
 ```bash
-npx vercel dev
+npm run dev:vercel
 ```
 
-This starts both the Vite dev server and the `/api/quotes` serverless function on **http://localhost:3000**.
+This starts the app and the `/api/quotes` serverless function together on **http://localhost:3000**.
+
+Use `npm run dev` only when you want the frontend by itself on **http://localhost:5173**.
 
 ### 3 — Type-check
 
@@ -70,6 +72,12 @@ stock-tracker/
 ├── api/
 │   └── quotes.ts          # Vercel serverless function — fetches Yahoo Finance
 ├── src/
+│   ├── components/
+│   │   ├── CompanyModal.tsx    # Add/edit company modal form
+│   │   ├── FinModal.tsx        # Add/edit financial row modal form
+│   │   ├── FinancialsPanel.tsx # "/financials" page display component
+│   │   ├── MultiplesPanel.tsx  # "/" page display component
+│   │   └── RootLayout.tsx      # App shell: header, nav, DataContext provider
 │   ├── context/
 │   │   └── DataContext.tsx # React context: companies + financials state
 │   ├── data/
@@ -78,11 +86,11 @@ stock-tracker/
 │   │   ├── useQuotes.ts    # Fetches /api/quotes, merges live data onto companies
 │   │   └── useStorage.ts   # Generic localStorage hook
 │   ├── lib/
-│   │   └── utils.ts        # Pure formatting/math utilities
+│   │   └── utils.ts        # Pure formatting/math/download utilities
 │   ├── routes/
-│   │   ├── __root.tsx      # Root layout: header, nav, DataContext provider
-│   │   ├── index.tsx       # "/" — Multiples table
-│   │   └── financials.tsx  # "/financials" — Financials table
+│   │   ├── __root.tsx      # Re-exports RootLayout as the TanStack root route
+│   │   ├── index.tsx       # Re-exports MultiplesPanel as the "/" route
+│   │   └── financials.tsx  # Re-exports FinancialsPanel as the "/financials" route
 │   ├── main.tsx            # React entry point
 │   ├── router.tsx          # TanStack Router route tree
 │   ├── types.ts            # Shared TypeScript interfaces
@@ -102,6 +110,7 @@ A launch configuration is included in `.vscode/launch.json` with three options:
 | Configuration | What it does |
 |---|---|
 | **Dev server (npm run dev)** | Starts `npm run dev` in the integrated terminal |
+| **Vercel full-stack dev** | Recommended when you need the live `/api/quotes` function locally on port 3000 |
 | **Attach to Chrome (localhost:5173)** | Attaches to an already-running Chrome with remote debugging on port 9222 |
 | **Launch Chrome + Dev server** | Launches Chrome pointed at the Vite dev server |
 | **Full-stack debug** *(compound)* | Runs the dev server **and** attaches Chrome simultaneously |
@@ -166,7 +175,7 @@ Color coding in the multiples columns:
 
 | Layer | Technology |
 |---|---|
-| Frontend framework | React 18 |
+| Frontend framework | React 19 |
 | Routing | TanStack Router v1 (code-based) |
 | Bundler | Vite 8 |
 | Language | TypeScript 6 (strict) |
