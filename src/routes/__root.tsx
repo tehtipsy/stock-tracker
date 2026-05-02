@@ -1,5 +1,5 @@
 import { Outlet, Link, useRouterState } from '@tanstack/react-router'
-import { useMemo, useRef } from 'react'
+import { useMemo } from 'react'
 import { DataContext } from '../context/DataContext'
 import { useStorage } from '../hooks/useStorage'
 import { useQuotes } from '../hooks/useQuotes'
@@ -24,7 +24,6 @@ export default function RootLayout() {
   const [financials, setFinancials] = useStorage<FinancialRow[]>('ff_financials', DEFAULTS.financials)
   const { loading, error, refresh, mergeQuotes } = useQuotes()
   const { theme, toggle } = useDarkMode()
-  const iconKey = useRef(0)
 
   const liveCompanies = useMemo(() => mergeQuotes(companies), [companies, mergeQuotes])
 
@@ -82,11 +81,11 @@ export default function RootLayout() {
           <button onClick={resetData} style={{ color: 'var(--text3)' }}>Reset</button>
           <button
             className="theme-toggle"
-            onClick={() => { iconKey.current += 1; toggle() }}
+            onClick={toggle}
             title={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
             aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
           >
-            <span key={iconKey.current} className="theme-icon">{theme === 'dark' ? '☀' : '☽'}</span>
+            <span key={theme} className="theme-icon">{theme === 'dark' ? '☀' : '☽'}</span>
           </button>
         </div>
       </header>
