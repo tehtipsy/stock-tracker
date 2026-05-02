@@ -71,8 +71,11 @@ stock-tracker/
 │   └── quotes.ts          # Vercel serverless function — fetches Yahoo Finance
 ├── src/
 │   ├── components/
-│   │   ├── CompanyModal.tsx # Add/edit company modal form
-│   │   └── FinModal.tsx    # Add/edit financial row modal form
+│   │   ├── CompanyModal.tsx    # Add/edit company modal form
+│   │   ├── FinModal.tsx        # Add/edit financial row modal form
+│   │   ├── FinancialsPanel.tsx # "/financials" page display component
+│   │   ├── MultiplesPanel.tsx  # "/" page display component
+│   │   └── RootLayout.tsx      # App shell: header, nav, DataContext provider
 │   ├── context/
 │   │   └── DataContext.tsx # React context: companies + financials state
 │   ├── data/
@@ -83,9 +86,9 @@ stock-tracker/
 │   ├── lib/
 │   │   └── utils.ts        # Pure formatting/math/download utilities
 │   ├── routes/
-│   │   ├── __root.tsx      # Root layout: header, nav, DataContext provider
-│   │   ├── index.tsx       # "/" — Multiples table
-│   │   └── financials.tsx  # "/financials" — Financials table
+│   │   ├── __root.tsx      # Re-exports RootLayout as the TanStack root route
+│   │   ├── index.tsx       # Re-exports MultiplesPanel as the "/" route
+│   │   └── financials.tsx  # Re-exports FinancialsPanel as the "/financials" route
 │   ├── main.tsx            # React entry point
 │   ├── router.tsx          # TanStack Router route tree
 │   ├── types.ts            # Shared TypeScript interfaces
