@@ -1,11 +1,21 @@
 import { useState } from 'react'
 import { useData } from '../context/DataContext'
 import { nid, fmtM, marg, segTagClass, num } from '../lib/utils'
+import type { Company, FinancialRow } from '../types'
+
+type FinFormData = Omit<FinancialRow, 'id'>
 
 // ── Financial row modal ────────────────────────────────────────────────────
-function FinModal({ record, companies, onSave, onClose }) {
+interface FinModalProps {
+  record: FinancialRow | null
+  companies: Company[]
+  onSave: (data: FinFormData) => void
+  onClose: () => void
+}
+
+function FinModal({ record, companies, onSave, onClose }: FinModalProps) {
   const [form, setForm] = useState({
-    cid: record?.cid ?? (companies[0]?.id ?? ''),
+    cid: String(record?.cid ?? (companies[0]?.id ?? '')),
     year: record?.year ?? 2024,
     scope: record?.scope ?? 'Consolidated',
     quarter: record?.quarter ?? '',
@@ -16,7 +26,7 @@ function FinModal({ record, companies, onSave, onClose }) {
     net: record?.net ?? '',
   })
 
-  const set = (k, v) => setForm(prev => ({ ...prev, [k]: v }))
+  const set = (k: string, v: string | number) => setForm(prev => ({ ...prev, [k]: v }))
 
   function handleSave() {
     const co = companies.find(c => c.id === parseInt(form.cid))
@@ -25,8 +35,8 @@ function FinModal({ record, companies, onSave, onClose }) {
       ticker: co.ticker,
       name: co.name,
       cid: co.id,
-      scope: form.scope.trim() || 'Consolidated',
-      year: parseInt(form.year) || 2024,
+      scope: String(form.scope).trim() || 'Consolidated',
+      year: parseInt(String(form.year)) || 2024,
       quarter: form.quarter || null,
       sales: num(form.sales),
       gp: num(form.gp),
@@ -36,10 +46,10 @@ function FinModal({ record, companies, onSave, onClose }) {
     })
   }
 
-  const fld = (label, key, type = 'text', placeholder = '—') => (
+  const fld = (label: string, key: string, type = 'text', placeholder = '—') => (
     <div className="form-row">
       <label className="form-label">{label}</label>
-      <input type={type} value={form[key] ?? ''} placeholder={placeholder}
+      <input type={type} value={String(form[key as keyof typeof form] ?? '')} placeholder={placeholder}
         onChange={e => set(key, e.target.value)} />
     </div>
   )
@@ -63,7 +73,7 @@ function FinModal({ record, companies, onSave, onClose }) {
           {fld('Scope (e.g. Consolidated, Fragrance…)', 'scope', 'text', 'Consolidated')}
           <div className="form-row">
             <label className="form-label">Quarter / Period</label>
-            <select value={form.quarter} onChange={e => set('quarter', e.target.value)}>
+            <select value={String(form.quarter)} onChange={e => set('quarter', e.target.value)}>
               {qOpts.map(q => <option key={q} value={q}>{q || 'Annual (full year)'}</option>)}
             </select>
           </div>
@@ -71,7 +81,7 @@ function FinModal({ record, companies, onSave, onClose }) {
         <p style={{ fontSize: 11, color: 'var(--text3)', marginBottom: 8 }}>
           Leave quarter blank for annual / full-year data. Use H1/H2 for semi-annual reporters.
         </p>
-        <div className="modal-section">P&L figures ($M) — margins calculated automatically</div>
+        <div className="modal-section">P&amp;L figures ($M) — margins calculated automatically</div>
         <div className="form-grid">
           {fld('Sales / Revenue', 'sales', 'number')}
           {fld('Gross profit', 'gp', 'number')}
@@ -89,26 +99,26 @@ function FinModal({ record, companies, onSave, onClose }) {
 }
 
 // ── Financials panel ───────────────────────────────────────────────────────
-const Q_ORD = { Q1: 1, Q2: 2, Q3: 3, Q4: 4, H1: 1, H2: 2 }
+const Q_ORD: Record<string, number> = { Q1: 1, Q2: 2, Q3: 3, Q4: 4, H1: 1, H2: 2 }
 
 export default function FinancialsPanel() {
   const { companies, financials, setFinancials } = useData()
 
   const [filterCo, setFilterCo] = useState('')
   const [filterYr, setFilterYr] = useState('')
-  const [period, setPeriod] = useState('annual')
+  const [period, setPeriod] = useState<'annual' | 'quarterly'>('annual')
   const [filterQtr, setFilterQtr] = useState('')
-  const [view, setView] = useState('segments')
-  const [modal, setModal] = useState(null) // null | { record: obj|null }
+  const [view, setView] = useState<'segments' | 'consolidated'>('segments')
+  const [modal, setModal] = useState<{ record: FinancialRow | null } | null>(null)
 
   const isQ = period === 'quarterly'
   const years = [...new Set(financials.map(f => f.year))].sort((a, b) => b - a)
 
   function openAdd() { setModal({ record: null }) }
-  function openEdit(id) { setModal({ record: financials.find(f => f.id === id) ?? null }) }
+  function openEdit(id: number) { setModal({ record: financials.find(f => f.id === id) ?? null }) }
   function closeModal() { setModal(null) }
 
-  function saveFin(data) {
+  function saveFin(data: FinFormData) {
     const editing = modal?.record
     if (editing) {
       setFinancials(prev => prev.map(f => f.id === editing.id ? { ...f, ...data } : f))
@@ -118,14 +128,14 @@ export default function FinancialsPanel() {
     closeModal()
   }
 
-  function delFin(id) {
+  function delFin(id: number) {
     if (!confirm('Remove this row?')) return
     setFinancials(prev => prev.filter(f => f.id !== id))
   }
 
   let rows = financials.filter(f => {
     if (filterCo && f.ticker !== filterCo) return false
-    if (filterYr && f.year != filterYr) return false
+    if (filterYr && f.year !== Number(filterYr)) return false
     if (view === 'consolidated' && f.scope !== 'Consolidated') return false
     if (isQ && !f.quarter) return false
     if (!isQ && f.quarter) return false
@@ -145,7 +155,7 @@ export default function FinancialsPanel() {
     return a.scope.localeCompare(b.scope)
   })
 
-  const margCell = (n, d) => {
+  const margCell = (n: number | null | undefined, d: number | null | undefined) => {
     const v = marg(n, d)
     return <td className="mono cell-dim" style={{ fontSize: 11 }}>{v != null ? v.toFixed(1) + '%' : '—'}</td>
   }
@@ -163,7 +173,7 @@ export default function FinancialsPanel() {
           <option value="">All years</option>
           {years.map(y => <option key={y} value={y}>{y}</option>)}
         </select>
-        <select id="f-period" value={period} onChange={e => setPeriod(e.target.value)}>
+        <select id="f-period" value={period} onChange={e => setPeriod(e.target.value as 'annual' | 'quarterly')}>
           <option value="annual">Annual</option>
           <option value="quarterly">Quarterly</option>
         </select>
@@ -173,7 +183,7 @@ export default function FinancialsPanel() {
             {['Q1', 'Q2', 'Q3', 'Q4'].map(q => <option key={q}>{q}</option>)}
           </select>
         )}
-        <select value={view} onChange={e => setView(e.target.value)}>
+        <select value={view} onChange={e => setView(e.target.value as 'segments' | 'consolidated')}>
           <option value="segments">Show segments</option>
           <option value="consolidated">Consolidated only</option>
         </select>
@@ -223,7 +233,7 @@ export default function FinancialsPanel() {
               const periodLabel = r.quarter
                 ? <><span style={{ color: 'var(--amber)', fontWeight: 600 }}>{r.quarter}</span> {r.year}</>
                 : `FY${r.year}`
-              const valCell = v => (
+              const valCell = (v: number | null | undefined) => (
                 <td className={`mono${isConsolidated ? '' : ' cell-dim'}`}>{fmtM(v)}</td>
               )
               return (

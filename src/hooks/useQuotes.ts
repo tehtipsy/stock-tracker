@@ -1,18 +1,25 @@
 import { useState, useEffect, useCallback } from 'react'
+import type { Company, LiveQuote, QuotesResponse } from '../types'
 
 // Fields that the live API can update on a company row
-const LIVE_FIELDS = ['mcap', 'pe', 'ps', 'ev_revenue', 'ev_ebitda']
+const LIVE_FIELDS: (keyof LiveQuote)[] = ['mcap', 'pe', 'ps', 'ev_revenue', 'ev_ebitda']
+
+interface UseQuotesResult {
+  quotes: Record<string, LiveQuote>
+  loading: boolean
+  error: string | null
+  refresh: () => Promise<void>
+  mergeQuotes: (companies: Company[]) => Company[]
+}
 
 /**
  * Fetches live market quotes from /api/quotes and returns a merge function.
  * The merge function overlays live fields onto a companies array.
- *
- * @returns {{ quotes: object, loading: boolean, error: string|null, refresh: function, mergeQuotes: function }}
  */
-export function useQuotes() {
-  const [quotes, setQuotes] = useState({})
+export function useQuotes(): UseQuotesResult {
+  const [quotes, setQuotes] = useState<Record<string, LiveQuote>>({})
   const [loading, setLoading] = useState(true)
-  const [error, setError] = useState(null)
+  const [error, setError] = useState<string | null>(null)
 
   const fetchQuotes = useCallback(async () => {
     setLoading(true)
@@ -20,29 +27,29 @@ export function useQuotes() {
     try {
       const res = await fetch('/api/quotes')
       if (!res.ok) throw new Error(`API ${res.status}`)
-      const data = await res.json()
+      const data = (await res.json()) as QuotesResponse
       setQuotes(data.quotes ?? {})
     } catch (err) {
-      setError(err.message)
+      setError((err as Error).message)
     } finally {
       setLoading(false)
     }
   }, [])
 
-  useEffect(() => { fetchQuotes() }, [fetchQuotes])
+  useEffect(() => { void fetchQuotes() }, [fetchQuotes])
 
   /**
    * Overlay live quote data onto companies array.
    * Only updates non-null live values so manual edits for unlisted companies are preserved.
    */
-  const mergeQuotes = useCallback((companies) => {
+  const mergeQuotes = useCallback((companies: Company[]): Company[] => {
     if (!Object.keys(quotes).length) return companies
     return companies.map(c => {
       const q = quotes[c.ticker]
       if (!q) return c
-      const overrides = {}
+      const overrides: Partial<Company> = {}
       for (const f of LIVE_FIELDS) {
-        if (q[f] != null) overrides[f] = q[f]
+        if (q[f] != null) (overrides as Record<string, number | null>)[f] = q[f]
       }
       return Object.keys(overrides).length ? { ...c, ...overrides } : c
     })

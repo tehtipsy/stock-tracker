@@ -1,4 +1,4 @@
-import { createRouter, createRootRoute, createRoute, Outlet } from '@tanstack/react-router'
+import { createRouter, createRootRoute, createRoute } from '@tanstack/react-router'
 import Header from './routes/__root'
 import MultiplesPanel from './routes/index'
 import FinancialsPanel from './routes/financials'
@@ -20,3 +20,10 @@ export const financialsRoute = createRoute({
 const routeTree = rootRoute.addChildren([multiplesRoute, financialsRoute])
 
 export const router = createRouter({ routeTree })
+
+// Augment TanStack Router module for type safety
+declare module '@tanstack/react-router' {
+  interface Register {
+    router: typeof router
+  }
+}

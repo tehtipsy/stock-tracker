@@ -1,7 +1,14 @@
+import type { Company, FinancialRow } from '../types'
+
+interface Defaults {
+  companies: Company[]
+  financials: FinancialRow[]
+}
+
 // Static seed data – market multiples are overlaid at runtime by /api/quotes
 // Financials: FY2024/2025 actuals (USD equiv at ~1.08 EUR/USD, ~0.83 GBP/USD, ~145 JPY/USD)
 // Sources: company press releases, CNBC, Gurufocus, StockAnalysis, Morningstar (Apr 2026)
-const DEFAULTS = {
+const DEFAULTS: Defaults = {
   companies: [
     {id:1,ticker:'IFF',name:'IFF',segment:'Diversified',mcap:18100,ev_revenue:2.8,ev_ebitda:14.4,ev_ebit:27.3,pe:null,ps:1.7,ev_nopat:null,ebitda_margin:19.2,year:2024},
     {id:2,ticker:'GIVN',name:'Givaudan',segment:'Diversified',mcap:28500,ev_revenue:4.0,ev_ebitda:21.0,ev_ebit:27.0,pe:26.1,ps:3.5,ev_nopat:null,ebitda_margin:23.8,year:2024},
