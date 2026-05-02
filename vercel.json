@@ -3,7 +3,10 @@
   "outputDirectory": "dist",
   "framework": "vite",
   "rewrites": [
-    { "source": "/((?!api/).*)", "destination": "/index.html" }
+    {
+      "source": "/financials",
+      "destination": "/index.html"
+    }
   ],
   "functions": {
     "api/*.ts": { "memory": 1024 }

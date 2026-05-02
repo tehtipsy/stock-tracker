@@ -34,12 +34,65 @@
       "sourceMapPathOverrides": {
         "/@fs/*": "${workspaceFolder}/*"
       }
+    },
+    {
+      "name": "Vercel dev server (npm run dev:vercel)",
+      "type": "node",
+      "request": "launch",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": [
+        "run",
+        "dev:vercel"
+      ],
+      "console": "integratedTerminal",
+      "skipFiles": [
+        "<node_internals>/**"
+      ],
+      "env": {
+        "BROWSER": "none"
+      }
+    },
+    {
+      "name": "Attach to Chrome (localhost:3000)",
+      "type": "chrome",
+      "request": "attach",
+      "port": 9222,
+      "urlFilter": "http://localhost:3000/*",
+      "webRoot": "${workspaceFolder}/src",
+      "sourceMapPathOverrides": {
+        "/@fs/*": "${workspaceFolder}/*"
+      }
+    },
+    {
+      "name": "Launch Chrome (localhost:3000)",
+      "type": "chrome",
+      "request": "launch",
+      "url": "http://localhost:3000",
+      "webRoot": "${workspaceFolder}/src",
+      "preLaunchTask": "npm: dev:vercel",
+      "sourceMapPathOverrides": {
+        "/@fs/*": "${workspaceFolder}/*"
+      }
     }
   ],
   "compounds": [
     {
       "name": "Full-stack debug",
       "configurations": ["Dev server (npm run dev)", "Attach to Chrome (localhost:5173)"]
+    },
+    {
+      "name": "Full-stack debug (Vercel)",
+      "configurations": [
+        "Vercel dev server (npm run dev:vercel)",
+        "Attach to Chrome (localhost:3000)"
+      ]
+    },
+    {
+      "name": "Full-stack debug (Vercel, launch Chrome)",
+      "configurations": [
+        "Vercel dev server (npm run dev:vercel)",
+        "Launch Chrome (localhost:3000)"
+      ]
     }
   ]
 }
