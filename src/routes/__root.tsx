@@ -3,6 +3,7 @@ import { useMemo } from 'react'
 import { DataContext } from '../context/DataContext'
 import { useStorage } from '../hooks/useStorage'
 import { useQuotes } from '../hooks/useQuotes'
+import { useDarkMode } from '../hooks/useDarkMode'
 import DEFAULTS from '../data/defaults'
 import type { Company, FinancialRow } from '../types'
 
@@ -22,6 +23,7 @@ export default function RootLayout() {
   const [companies, setCompanies] = useStorage<Company[]>('ff_companies', DEFAULTS.companies)
   const [financials, setFinancials] = useStorage<FinancialRow[]>('ff_financials', DEFAULTS.financials)
   const { loading, error, refresh, mergeQuotes } = useQuotes()
+  const { theme, toggle } = useDarkMode()
 
   const liveCompanies = useMemo(() => mergeQuotes(companies), [companies, mergeQuotes])
 
@@ -77,6 +79,14 @@ export default function RootLayout() {
           <button onClick={() => { void refresh() }} style={{ fontSize: 11, padding: '0 10px', height: 28 }}>↻</button>
           <button onClick={exportCSV}>Export CSV</button>
           <button onClick={resetData} style={{ color: 'var(--text3)' }}>Reset</button>
+          <button
+            className="theme-toggle"
+            onClick={toggle}
+            title={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+            aria-label={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+          >
+            <span key={theme} className="theme-icon">{theme === 'dark' ? '☀' : '☽'}</span>
+          </button>
         </div>
       </header>
       <main>
