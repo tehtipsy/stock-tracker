@@ -151,7 +151,7 @@ export default function MultiplesPanel() {
 
   const mkCell = (val, med, higherBetter = false, renderFn = fmt) => {
     const cls = colorClass(val, med, higherBetter)
-    return <td key={Math.random()} className={`mono${cls ? ' ' + cls : ' cell-dim'}`}>{renderFn(val)}</td>
+    return <td className={`mono${cls ? ' ' + cls : ' cell-dim'}`}>{renderFn(val)}</td>
   }
 
   return (
