@@ -10,7 +10,7 @@ Market data (**market cap, P/E, P/S, EV/Revenue, EV/EBITDA**) is fetched live fr
 
 ### Prerequisites
 
-- **Node.js ≥ 20** (the Vercel API function targets Node 20)
+- **Node.js ≥ 24** (the Vercel API function targets Node 24)
 - **npm ≥ 9**
 
 ### 1 — Install dependencies
