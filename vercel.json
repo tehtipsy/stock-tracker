@@ -6,6 +6,6 @@
     { "source": "/((?!api/).*)", "destination": "/index.html" }
   ],
   "functions": {
-    "api/*.ts": {}
+    "api/*.ts": { "maxDuration": 10 }
   }
 }
