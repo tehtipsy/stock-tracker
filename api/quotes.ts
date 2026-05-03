@@ -39,7 +39,7 @@ function round2(v: number | null | undefined): number | null {
 function toQuote(d: QuoteSummaryResult, usdRate: number | null, ebit: number | null): LiveQuote {
   const rawMcap = d.price?.marketCap
   const ev = d.defaultKeyStatistics?.enterpriseValue
-  const ev_ebit = ev != null && ebit != null && ebit > 0 ? round2(ev / ebit) : null
+  const ev_ebit = ev != null && ebit != null && ebit !== 0 ? round2(ev / ebit) : null
   return {
     mcap:       rawMcap != null && usdRate != null ? Math.round((rawMcap * usdRate) / 1e6) : null,
     pe:         round2(d.summaryDetail?.trailingPE),
