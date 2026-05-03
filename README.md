@@ -109,17 +109,30 @@ stock-tracker/
 
 A launch configuration is included in `.vscode/launch.json` with the following options:
 
+#### Vite dev server (port 5173)
+
 | Configuration | What it does |
 |---|---|
 | **Dev server (npm run dev)** | Starts `npm run dev`; once Vite is ready, automatically launches Chrome pointed at `localhost:5173` |
-| **Vercel dev server (npm run dev:vercel)** | Recommended when you need the live `/api/quotes` function locally on port 3000; automatically launches Chrome when ready |
-| **Attach to Chrome (localhost:5173)** | Attaches to an already-running Chrome with remote debugging on port 9222 |
 | **Launch Chrome (localhost:5173)** | Launches Chrome pointed at the Vite dev server (use when the server is already running) |
+| **Attach to Chrome (localhost:5173)** | Attaches to an already-running Chrome instance with remote debugging on port 9222 |
 | **Full-stack debug** *(compound)* | Alias for **Dev server (npm run dev)** — starts the server and auto-launches Chrome |
+
+#### Vercel dev server (port 3000)
+
+| Configuration | What it does |
+|---|---|
+| **Vercel dev server (npm run dev:vercel)** | Starts `vercel dev`; once ready, automatically launches Chrome pointed at `localhost:3000` |
+| **Launch Chrome (localhost:3000)** | Launches Chrome pointed at the Vercel dev server (use when the server is already running) |
+| **Attach to Chrome (localhost:3000)** | Attaches to an already-running Chrome instance with remote debugging on port 9222 |
+| **Full-stack debug (Vercel)** *(compound)* | Starts the Vercel dev server and attaches Chrome simultaneously |
+| **Full-stack debug (Vercel, launch Chrome)** *(compound)* | Starts the Vercel dev server and auto-launches Chrome via `serverReadyAction` |
 
 To debug Vite components, use **Dev server (npm run dev)** or the **Full-stack debug** compound. VS Code will start the dev server and automatically open a Chrome debugger session once Vite reports ready, so breakpoints in `.tsx`/`.ts` source files bind correctly.
 
-To manually attach to an existing Chrome instance, start Chrome with `--remote-debugging-port=9222` and use **Attach to Chrome (localhost:5173)**.
+To debug `/api` routes alongside the frontend, use **Vercel dev server (npm run dev:vercel)** or the **Full-stack debug (Vercel, launch Chrome)** compound.
+
+To manually attach to an existing Chrome instance, start Chrome with `--remote-debugging-port=9222` and use the relevant **Attach to Chrome** configuration.
 
 ---
 
