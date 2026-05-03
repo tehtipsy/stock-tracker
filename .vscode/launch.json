@@ -11,6 +11,12 @@
       "skipFiles": ["<node_internals>/**"],
       "env": {
         "BROWSER": "none"
+      },
+      "serverReadyAction": {
+        "action": "startDebugging",
+        "name": "Launch Chrome (localhost:5173)",
+        "pattern": "Local.*http://localhost",
+        "killOnServerStop": true
       }
     },
     {
@@ -21,18 +27,19 @@
       "urlFilter": "http://localhost:5173/*",
       "webRoot": "${workspaceFolder}",
       "sourceMapPathOverrides": {
-        "/@fs/*": "/*"
+        "/@fs/*": "/*",
+        "/src/*": "${workspaceFolder}/src/*"
       }
     },
     {
-      "name": "Launch Chrome + Dev server",
+      "name": "Launch Chrome (localhost:5173)",
       "type": "chrome",
       "request": "launch",
       "url": "http://localhost:5173",
       "webRoot": "${workspaceFolder}",
-      "preLaunchTask": "npm: dev",
       "sourceMapPathOverrides": {
-        "/@fs/*": "/*"
+        "/@fs/*": "/*",
+        "/src/*": "${workspaceFolder}/src/*"
       }
     },
     {
@@ -72,7 +79,8 @@
       "webRoot": "${workspaceFolder}",
       "sourceMapPathOverrides": {
         "http://localhost:3000/*": "${workspaceFolder}/*",
-        "/@fs/*": "/*"
+        "/@fs/*": "/*",
+        "/src/*": "${workspaceFolder}/src/*"
       }
     },
     {
@@ -83,14 +91,15 @@
       "webRoot": "${workspaceFolder}",
       "sourceMapPathOverrides": {
         "http://localhost:3000/*": "${workspaceFolder}/*",
-        "/@fs/*": "/*"
+        "/@fs/*": "/*",
+        "/src/*": "${workspaceFolder}/src/*"
       }
     }
   ],
   "compounds": [
     {
       "name": "Full-stack debug",
-      "configurations": ["Dev server (npm run dev)", "Attach to Chrome (localhost:5173)"]
+      "configurations": ["Dev server (npm run dev)"]
     },
     {
       "name": "Full-stack debug (Vercel)",

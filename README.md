@@ -107,17 +107,32 @@ stock-tracker/
 
 ## Debugging in VS Code
 
-A launch configuration is included in `.vscode/launch.json` with three options:
+A launch configuration is included in `.vscode/launch.json` with the following options:
+
+#### Vite dev server (port 5173)
 
 | Configuration | What it does |
 |---|---|
-| **Dev server (npm run dev)** | Starts `npm run dev` in the integrated terminal |
-| **Vercel full-stack dev** | Recommended when you need the live `/api/quotes` function locally on port 3000 |
-| **Attach to Chrome (localhost:5173)** | Attaches to an already-running Chrome with remote debugging on port 9222 |
-| **Launch Chrome + Dev server** | Launches Chrome pointed at the Vite dev server |
-| **Full-stack debug** *(compound)* | Runs the dev server **and** attaches Chrome simultaneously |
+| **Dev server (npm run dev)** | Starts `npm run dev`; once Vite is ready, automatically launches Chrome pointed at `localhost:5173` |
+| **Launch Chrome (localhost:5173)** | Launches Chrome pointed at the Vite dev server (use when the server is already running) |
+| **Attach to Chrome (localhost:5173)** | Attaches to an already-running Chrome instance with remote debugging on port 9222 |
+| **Full-stack debug** *(compound)* | Alias for **Dev server (npm run dev)** — starts the server and auto-launches Chrome |
 
-To use the Chrome configurations, start Chrome with the `--remote-debugging-port=9222` flag, or use the **Launch Chrome + Dev server** preset which handles this automatically.
+#### Vercel dev server (port 3000)
+
+| Configuration | What it does |
+|---|---|
+| **Vercel dev server (npm run dev:vercel)** | Starts `vercel dev`; once ready, automatically launches Chrome pointed at `localhost:3000` |
+| **Launch Chrome (localhost:3000)** | Launches Chrome pointed at the Vercel dev server (use when the server is already running) |
+| **Attach to Chrome (localhost:3000)** | Attaches to an already-running Chrome instance with remote debugging on port 9222 |
+| **Full-stack debug (Vercel)** *(compound)* | Starts the Vercel dev server and attaches Chrome simultaneously |
+| **Full-stack debug (Vercel, launch Chrome)** *(compound)* | Starts the Vercel dev server and auto-launches Chrome via `serverReadyAction` |
+
+To debug Vite components, use **Dev server (npm run dev)** or the **Full-stack debug** compound. VS Code will start the dev server and automatically open a Chrome debugger session once Vite reports ready, so breakpoints in `.tsx`/`.ts` source files bind correctly. Port 5173 is fixed in `vite.config.ts` (`strictPort: true`) so the debugger config always stays in sync — if 5173 is already in use, Vite will exit with an error rather than silently switching ports.
+
+To debug `/api` routes alongside the frontend, use **Vercel dev server (npm run dev:vercel)** or the **Full-stack debug (Vercel, launch Chrome)** compound.
+
+To manually attach to an existing Chrome instance, start Chrome with `--remote-debugging-port=9222` and use the relevant **Attach to Chrome** configuration.
 
 ---
 
