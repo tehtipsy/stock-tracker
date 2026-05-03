@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react'
 import type { Company, LiveQuote, QuotesResponse } from '../types'
 
 // Fields that the live API can update on a company row
-const LIVE_FIELDS: (keyof LiveQuote)[] = ['mcap', 'pe', 'ps', 'ev_revenue', 'ev_ebitda']
+const LIVE_FIELDS: (keyof LiveQuote)[] = ['mcap', 'pe', 'ps', 'ev_revenue', 'ev_ebitda', 'ev_ebit']
 
 interface UseQuotesResult {
   quotes: Record<string, LiveQuote>
