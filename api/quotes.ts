@@ -32,15 +32,34 @@ function round2(v: number | null | undefined): number | null {
   return Math.round(v * 100) / 100
 }
 
-function toQuote(d: QuoteSummaryResult): LiveQuote {
+function toQuote(d: QuoteSummaryResult, usdRate: number | null): LiveQuote {
   const rawMcap = d.price?.marketCap
   return {
-    mcap:       rawMcap != null ? Math.round(rawMcap / 1e6) : null,
+    mcap:       rawMcap != null && usdRate != null ? Math.round((rawMcap * usdRate) / 1e6) : null,
     pe:         round2(d.summaryDetail?.trailingPE),
     ps:         round2(d.summaryDetail?.priceToSalesTrailing12Months),
     ev_revenue: round2(d.defaultKeyStatistics?.enterpriseToRevenue),
     ev_ebitda:  round2(d.defaultKeyStatistics?.enterpriseToEbitda),
   }
+}
+
+/** Fetch 1-unit-of-currency → USD rates for each non-USD currency. */
+async function fetchFxRates(currencies: string[]): Promise<Record<string, number>> {
+  const rates: Record<string, number> = { USD: 1 }
+  const nonUSD = currencies.filter(c => c !== 'USD')
+  if (!nonUSD.length) return rates
+
+  const fxResults = await Promise.allSettled(
+    nonUSD.map(c => yf.quoteSummary(`${c}USD=X`, { modules: ['price'] })),
+  )
+  nonUSD.forEach((currency, i) => {
+    const r = fxResults[i]
+    if (r.status === 'fulfilled') {
+      const rate = r.value.price?.regularMarketPrice
+      if (rate != null && isFinite(rate) && rate > 0) rates[currency] = rate
+    }
+  })
+  return rates
 }
 
 export default async function handler(req: IncomingMessage, res: ServerResponse): Promise<void> {
@@ -59,11 +78,29 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
     ),
   )
 
+  // Collect all unique non-USD currencies from the fetched quotes
+  const currencySet = new Set<string>()
+  results.forEach(r => {
+    if (r.status === 'fulfilled') {
+      const currency = r.value.price?.currency
+      if (currency) currencySet.add(currency)
+    }
+  })
+
+  // Fetch USD exchange rates for all non-USD currencies encountered
+  const fxRates = await fetchFxRates([...currencySet])
+
   const quotes: Record<string, LiveQuote> = {}
   entries.forEach(([appTicker], i) => {
     const result = results[i]
     if (result.status !== 'fulfilled') return
-    quotes[appTicker] = toQuote(result.value)
+    const d = result.value
+    const currency = d.price?.currency ?? 'USD'
+    const usdRate = fxRates[currency]
+    if (usdRate == null) {
+      console.warn(`[quotes] No USD rate found for currency "${currency}" (${appTicker}); market cap will be omitted.`)
+    }
+    quotes[appTicker] = toQuote(d, usdRate ?? null)
   })
 
   const body: QuotesResponse = { quotes, fetchedAt: new Date().toISOString() }
