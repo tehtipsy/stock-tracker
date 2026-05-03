@@ -19,9 +19,9 @@
       "request": "attach",
       "port": 9222,
       "urlFilter": "http://localhost:5173/*",
-      "webRoot": "${workspaceFolder}/src",
+      "webRoot": "${workspaceFolder}",
       "sourceMapPathOverrides": {
-        "/@fs/*": "${workspaceFolder}/*"
+        "/@fs/*": "/*"
       }
     },
     {
@@ -29,10 +29,10 @@
       "type": "chrome",
       "request": "launch",
       "url": "http://localhost:5173",
-      "webRoot": "${workspaceFolder}/src",
+      "webRoot": "${workspaceFolder}",
       "preLaunchTask": "npm: dev",
       "sourceMapPathOverrides": {
-        "/@fs/*": "${workspaceFolder}/*"
+        "/@fs/*": "/*"
       }
     },
     {
@@ -48,6 +48,12 @@
       "skipFiles": [
         "<node_internals>/**"
       ],
+      "sourceMaps": true,
+      "resolveSourceMapLocations": [
+        "${workspaceFolder}/**",
+        "!**/node_modules/**"
+      ],
+      "autoAttachChildProcesses": true,
       "env": {
         "BROWSER": "none"
       }
@@ -58,9 +64,9 @@
       "request": "attach",
       "port": 9222,
       "urlFilter": "http://localhost:3000/*",
-      "webRoot": "${workspaceFolder}/src",
+      "webRoot": "${workspaceFolder}",
       "sourceMapPathOverrides": {
-        "/@fs/*": "${workspaceFolder}/*"
+        "/@fs/*": "/*"
       }
     },
     {
@@ -68,10 +74,9 @@
       "type": "chrome",
       "request": "launch",
       "url": "http://localhost:3000",
-      "webRoot": "${workspaceFolder}/src",
-      "preLaunchTask": "npm: dev:vercel",
+      "webRoot": "${workspaceFolder}",
       "sourceMapPathOverrides": {
-        "/@fs/*": "${workspaceFolder}/*"
+        "/@fs/*": "/*"
       }
     }
   ],
