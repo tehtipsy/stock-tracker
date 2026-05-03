@@ -1,9 +1,9 @@
 import { useState } from 'react'
-import { useData } from '../context/DataContext'
-import { nid, fmtM, marg, segTagClass } from '../lib/utils'
-import FinModal from './FinModal'
-import type { FinFormData } from './FinModal'
-import type { FinancialRow } from '../types'
+import { useData } from '../../context/DataContext'
+import { nid, fmtM, marg, segTagClass } from '../../lib/utils'
+import FinModal from '../display/FinModal'
+import type { FinFormData } from '../display/FinModal'
+import type { FinancialRow } from '../../types'
 
 const Q_ORD: Record<string, number> = { Q1: 1, Q2: 2, Q3: 3, Q4: 4, H1: 1, H2: 2 }
 

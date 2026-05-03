@@ -1,6 +1,6 @@
 import { useState } from 'react'
-import { num } from '../lib/utils'
-import type { Company } from '../types'
+import { num } from '../../lib/utils'
+import type { Company } from '../../types'
 
 export type CompanyFormData = Omit<Company, 'id'>
 

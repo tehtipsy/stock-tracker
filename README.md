@@ -73,11 +73,13 @@ stock-tracker/
 │   └── quotes.ts          # Vercel serverless function — fetches Yahoo Finance
 ├── src/
 │   ├── components/
-│   │   ├── CompanyModal.tsx    # Add/edit company modal form
-│   │   ├── FinModal.tsx        # Add/edit financial row modal form
-│   │   ├── FinancialsPanel.tsx # "/financials" page display component
-│   │   ├── MultiplesPanel.tsx  # "/" page display component
-│   │   └── RootLayout.tsx      # App shell: header, nav, DataContext provider
+│   │   ├── display/
+│   │   │   ├── CompanyModal.tsx    # Add/edit company modal form (local form state only)
+│   │   │   └── FinModal.tsx        # Add/edit financial row modal form (local form state only)
+│   │   └── stateful/
+│   │       ├── FinancialsPanel.tsx # "/financials" page — state, filters, CRUD
+│   │       ├── MultiplesPanel.tsx  # "/" page — state, sorting, CRUD
+│   │       └── RootLayout.tsx      # App shell: hooks, DataContext provider, header/nav
 │   ├── context/
 │   │   └── DataContext.tsx # React context: companies + financials state
 │   ├── data/

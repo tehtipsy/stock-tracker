@@ -1,1 +1,1 @@
-export { default } from '../components/MultiplesPanel'
+export { default } from '../components/stateful/MultiplesPanel'

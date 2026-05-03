@@ -1,12 +1,12 @@
 import { Outlet, Link, useRouterState } from '@tanstack/react-router'
 import { useMemo } from 'react'
-import { DataContext } from '../context/DataContext'
-import { useStorage } from '../hooks/useStorage'
-import { useQuotes } from '../hooks/useQuotes'
-import { useDarkMode } from '../hooks/useDarkMode'
-import { dl } from '../lib/utils'
-import DEFAULTS from '../data/defaults'
-import type { Company, FinancialRow } from '../types'
+import { DataContext } from '../../context/DataContext'
+import { useStorage } from '../../hooks/useStorage'
+import { useQuotes } from '../../hooks/useQuotes'
+import { useDarkMode } from '../../hooks/useDarkMode'
+import { dl } from '../../lib/utils'
+import DEFAULTS from '../../data/defaults'
+import type { Company, FinancialRow } from '../../types'
 
 export default function RootLayout() {
   const routerState = useRouterState()
