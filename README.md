@@ -107,17 +107,19 @@ stock-tracker/
 
 ## Debugging in VS Code
 
-A launch configuration is included in `.vscode/launch.json` with three options:
+A launch configuration is included in `.vscode/launch.json` with the following options:
 
 | Configuration | What it does |
 |---|---|
-| **Dev server (npm run dev)** | Starts `npm run dev` in the integrated terminal |
-| **Vercel full-stack dev** | Recommended when you need the live `/api/quotes` function locally on port 3000 |
+| **Dev server (npm run dev)** | Starts `npm run dev`; once Vite is ready, automatically launches Chrome pointed at `localhost:5173` |
+| **Vercel dev server (npm run dev:vercel)** | Recommended when you need the live `/api/quotes` function locally on port 3000; automatically launches Chrome when ready |
 | **Attach to Chrome (localhost:5173)** | Attaches to an already-running Chrome with remote debugging on port 9222 |
-| **Launch Chrome + Dev server** | Launches Chrome pointed at the Vite dev server |
-| **Full-stack debug** *(compound)* | Runs the dev server **and** attaches Chrome simultaneously |
+| **Launch Chrome (localhost:5173)** | Launches Chrome pointed at the Vite dev server (use when the server is already running) |
+| **Full-stack debug** *(compound)* | Alias for **Dev server (npm run dev)** — starts the server and auto-launches Chrome |
 
-To use the Chrome configurations, start Chrome with the `--remote-debugging-port=9222` flag, or use the **Launch Chrome + Dev server** preset which handles this automatically.
+To debug Vite components, use **Dev server (npm run dev)** or the **Full-stack debug** compound. VS Code will start the dev server and automatically open a Chrome debugger session once Vite reports ready, so breakpoints in `.tsx`/`.ts` source files bind correctly.
+
+To manually attach to an existing Chrome instance, start Chrome with `--remote-debugging-port=9222` and use **Attach to Chrome (localhost:5173)**.
 
 ---
 
