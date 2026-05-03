@@ -42,6 +42,8 @@ export interface LiveQuote {
   ev_revenue: number | null
   ev_ebitda: number | null
   ev_ebit: number | null
+  ev_nopat: number | null
+  ebitda_margin: number | null
 }
 
 export interface QuotesResponse {

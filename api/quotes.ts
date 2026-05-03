@@ -36,10 +36,14 @@ function round2(v: number | null | undefined): number | null {
   return Math.round(v * 100) / 100
 }
 
-function toQuote(d: QuoteSummaryResult, usdRate: number | null, ebit: number | null): LiveQuote {
+function toQuote(d: QuoteSummaryResult, usdRate: number | null, financials: FinancialData): LiveQuote {
   const rawMcap = d.price?.marketCap
   const ev = d.defaultKeyStatistics?.enterpriseValue
+  const { ebit, ebitda, totalRevenue, taxRate } = financials
   const ev_ebit = ev != null && ebit != null && ebit !== 0 ? round2(ev / ebit) : null
+  const nopat = ebit != null && taxRate != null ? ebit * (1 - taxRate) : null
+  const ev_nopat = ev != null && nopat != null && nopat !== 0 ? round2(ev / nopat) : null
+  const ebitda_margin = ebitda != null && totalRevenue != null && totalRevenue !== 0 ? round2(ebitda / totalRevenue * 100) : null
   return {
     mcap:       rawMcap != null && usdRate != null ? Math.round((rawMcap * usdRate) / 1e6) : null,
     pe:         round2(d.summaryDetail?.trailingPE),
@@ -47,17 +51,32 @@ function toQuote(d: QuoteSummaryResult, usdRate: number | null, ebit: number | n
     ev_revenue: round2(d.defaultKeyStatistics?.enterpriseToRevenue),
     ev_ebitda:  round2(d.defaultKeyStatistics?.enterpriseToEbitda),
     ev_ebit,
+    ev_nopat,
+    ebitda_margin,
   }
 }
 
-/** Extract the most recent annual EBIT from a fundamentalsTimeSeries result array. */
-function extractEbit(rows: FundamentalsTimeSeriesFinancialsResult[]): number | null {
-  // Results are ordered oldest-first; find the last entry with a valid EBIT value
+interface FinancialData {
+  ebit: number | null
+  ebitda: number | null
+  totalRevenue: number | null
+  taxRate: number | null
+}
+
+/** Extract the most recent annual financial data from a fundamentalsTimeSeries result array. */
+function extractFinancials(rows: FundamentalsTimeSeriesFinancialsResult[]): FinancialData {
+  // Results are ordered oldest-first; find the last entry with a valid EBIT value as the anchor
   for (let i = rows.length - 1; i >= 0; i--) {
-    const v = rows[i].EBIT
-    if (v != null && isFinite(v)) return v
+    const row = rows[i]
+    const ebit = row.EBIT
+    if (ebit != null && isFinite(ebit)) {
+      const ebitda = row.EBITDA != null && isFinite(row.EBITDA) ? row.EBITDA : null
+      const totalRevenue = row.totalRevenue != null && isFinite(row.totalRevenue) ? row.totalRevenue : null
+      const taxRate = row.taxRateForCalcs != null && isFinite(row.taxRateForCalcs) ? row.taxRateForCalcs : null
+      return { ebit, ebitda, totalRevenue, taxRate }
+    }
   }
-  return null
+  return { ebit: null, ebitda: null, totalRevenue: null, taxRate: null }
 }
 
 /** Fetch 1-unit-of-currency → USD rates for each non-USD currency. */
@@ -125,8 +144,8 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
       console.warn(`[quotes] No USD rate found for currency "${currency}" (${appTicker}); market cap will be omitted.`)
     }
     const ftsResult = ftsResults[i]
-    const ebit = ftsResult.status === 'fulfilled' ? extractEbit(ftsResult.value) : null
-    quotes[appTicker] = toQuote(d, usdRate ?? null, ebit)
+    const financials = ftsResult.status === 'fulfilled' ? extractFinancials(ftsResult.value) : { ebit: null, ebitda: null, totalRevenue: null, taxRate: null }
+    quotes[appTicker] = toQuote(d, usdRate ?? null, financials)
   })
 
   const body: QuotesResponse = { quotes, fetchedAt: new Date().toISOString() }
