@@ -19,9 +19,9 @@
       "request": "attach",
       "port": 9222,
       "urlFilter": "http://localhost:5173/*",
-      "webRoot": "${workspaceFolder}/src",
+      "webRoot": "${workspaceFolder}",
       "sourceMapPathOverrides": {
-        "/@fs/*": "${workspaceFolder}/*"
+        "/@fs/*": "/*"
       }
     },
     {
@@ -29,10 +29,10 @@
       "type": "chrome",
       "request": "launch",
       "url": "http://localhost:5173",
-      "webRoot": "${workspaceFolder}/src",
+      "webRoot": "${workspaceFolder}",
       "preLaunchTask": "npm: dev",
       "sourceMapPathOverrides": {
-        "/@fs/*": "${workspaceFolder}/*"
+        "/@fs/*": "/*"
       }
     },
     {
@@ -48,8 +48,19 @@
       "skipFiles": [
         "<node_internals>/**"
       ],
+      "sourceMaps": true,
+      "resolveSourceMapLocations": [
+        "${workspaceFolder}/**",
+        "!**/node_modules/**"
+      ],
+      "autoAttachChildProcesses": true,
       "env": {
         "BROWSER": "none"
+      },
+      "serverReadyAction": {
+        "action": "startDebugging",
+        "name": "Launch Chrome (localhost:3000)",
+        "pattern": "Available at http://localhost:\\d+"
       }
     },
     {
@@ -58,9 +69,10 @@
       "request": "attach",
       "port": 9222,
       "urlFilter": "http://localhost:3000/*",
-      "webRoot": "${workspaceFolder}/src",
+      "webRoot": "${workspaceFolder}",
       "sourceMapPathOverrides": {
-        "/@fs/*": "${workspaceFolder}/*"
+        "http://localhost:3000/*": "${workspaceFolder}/*",
+        "/@fs/*": "/*"
       }
     },
     {
@@ -68,10 +80,10 @@
       "type": "chrome",
       "request": "launch",
       "url": "http://localhost:3000",
-      "webRoot": "${workspaceFolder}/src",
-      "preLaunchTask": "npm: dev:vercel",
+      "webRoot": "${workspaceFolder}",
       "sourceMapPathOverrides": {
-        "/@fs/*": "${workspaceFolder}/*"
+        "http://localhost:3000/*": "${workspaceFolder}/*",
+        "/@fs/*": "/*"
       }
     }
   ],
@@ -90,8 +102,7 @@
     {
       "name": "Full-stack debug (Vercel, launch Chrome)",
       "configurations": [
-        "Vercel dev server (npm run dev:vercel)",
-        "Launch Chrome (localhost:3000)"
+        "Vercel dev server (npm run dev:vercel)"
       ]
     }
   ]
