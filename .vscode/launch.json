@@ -56,6 +56,11 @@
       "autoAttachChildProcesses": true,
       "env": {
         "BROWSER": "none"
+      },
+      "serverReadyAction": {
+        "action": "startDebugging",
+        "name": "Launch Chrome (localhost:3000)",
+        "pattern": "Available at http://localhost:\\d+"
       }
     },
     {
@@ -66,6 +71,7 @@
       "urlFilter": "http://localhost:3000/*",
       "webRoot": "${workspaceFolder}",
       "sourceMapPathOverrides": {
+        "http://localhost:3000/*": "${workspaceFolder}/*",
         "/@fs/*": "/*"
       }
     },
@@ -76,6 +82,7 @@
       "url": "http://localhost:3000",
       "webRoot": "${workspaceFolder}",
       "sourceMapPathOverrides": {
+        "http://localhost:3000/*": "${workspaceFolder}/*",
         "/@fs/*": "/*"
       }
     }
@@ -95,8 +102,7 @@
     {
       "name": "Full-stack debug (Vercel, launch Chrome)",
       "configurations": [
-        "Vercel dev server (npm run dev:vercel)",
-        "Launch Chrome (localhost:3000)"
+        "Vercel dev server (npm run dev:vercel)"
       ]
     }
   ]
