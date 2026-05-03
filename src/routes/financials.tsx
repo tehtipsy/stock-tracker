@@ -1,1 +1,1 @@
-export { default } from '../components/FinancialsPanel'
+export { default } from '../components/stateful/FinancialsPanel'

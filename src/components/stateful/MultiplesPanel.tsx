@@ -1,9 +1,9 @@
 import { useState } from 'react'
-import { useData } from '../context/DataContext'
-import { nid, fmt, fmtPct, median, colorClass, segBadgeClass } from '../lib/utils'
-import CompanyModal from './CompanyModal'
-import type { CompanyFormData } from './CompanyModal'
-import type { Company } from '../types'
+import { useData } from '../../context/DataContext'
+import { nid, fmt, fmtPct, median, colorClass, segBadgeClass } from '../../lib/utils'
+import CompanyModal from '../display/CompanyModal'
+import type { CompanyFormData } from '../display/CompanyModal'
+import type { Company } from '../../types'
 
 type MultiplesField = keyof Pick<Company, 'ticker' | 'mcap' | 'ev_revenue' | 'ev_ebitda' | 'ev_ebit' | 'pe' | 'ps' | 'ev_nopat' | 'ebitda_margin'>
 

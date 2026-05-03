@@ -1,6 +1,6 @@
 import { useState } from 'react'
-import { num } from '../lib/utils'
-import type { Company, FinancialRow } from '../types'
+import { num } from '../../lib/utils'
+import type { Company, FinancialRow } from '../../types'
 
 export type FinFormData = Omit<FinancialRow, 'id'>
 
