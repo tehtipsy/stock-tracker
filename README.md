@@ -128,7 +128,7 @@ A launch configuration is included in `.vscode/launch.json` with the following o
 | **Full-stack debug (Vercel)** *(compound)* | Starts the Vercel dev server and attaches Chrome simultaneously |
 | **Full-stack debug (Vercel, launch Chrome)** *(compound)* | Starts the Vercel dev server and auto-launches Chrome via `serverReadyAction` |
 
-To debug Vite components, use **Dev server (npm run dev)** or the **Full-stack debug** compound. VS Code will start the dev server and automatically open a Chrome debugger session once Vite reports ready, so breakpoints in `.tsx`/`.ts` source files bind correctly.
+To debug Vite components, use **Dev server (npm run dev)** or the **Full-stack debug** compound. VS Code will start the dev server and automatically open a Chrome debugger session once Vite reports ready, so breakpoints in `.tsx`/`.ts` source files bind correctly. Port 5173 is fixed in `vite.config.ts` (`strictPort: true`) so the debugger config always stays in sync — if 5173 is already in use, Vite will exit with an error rather than silently switching ports.
 
 To debug `/api` routes alongside the frontend, use **Vercel dev server (npm run dev:vercel)** or the **Full-stack debug (Vercel, launch Chrome)** compound.
 
