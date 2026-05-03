@@ -32,10 +32,10 @@ function round2(v: number | null | undefined): number | null {
   return Math.round(v * 100) / 100
 }
 
-function toQuote(d: QuoteSummaryResult, usdRate: number): LiveQuote {
+function toQuote(d: QuoteSummaryResult, usdRate: number | null): LiveQuote {
   const rawMcap = d.price?.marketCap
   return {
-    mcap:       rawMcap != null ? Math.round((rawMcap * usdRate) / 1e6) : null,
+    mcap:       rawMcap != null && usdRate != null ? Math.round((rawMcap * usdRate) / 1e6) : null,
     pe:         round2(d.summaryDetail?.trailingPE),
     ps:         round2(d.summaryDetail?.priceToSalesTrailing12Months),
     ev_revenue: round2(d.defaultKeyStatistics?.enterpriseToRevenue),
@@ -83,7 +83,7 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
   results.forEach(r => {
     if (r.status === 'fulfilled') {
       const currency = r.value.price?.currency
-      if (currency && currency !== 'USD') currencySet.add(currency)
+      if (currency) currencySet.add(currency)
     }
   })
 
@@ -96,8 +96,11 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
     if (result.status !== 'fulfilled') return
     const d = result.value
     const currency = d.price?.currency ?? 'USD'
-    const usdRate = fxRates[currency] ?? 1
-    quotes[appTicker] = toQuote(d, usdRate)
+    const usdRate = fxRates[currency]
+    if (usdRate == null) {
+      console.warn(`[quotes] No USD rate found for currency "${currency}" (${appTicker}); market cap will be omitted.`)
+    }
+    quotes[appTicker] = toQuote(d, usdRate ?? null)
   })
 
   const body: QuotesResponse = { quotes, fetchedAt: new Date().toISOString() }
