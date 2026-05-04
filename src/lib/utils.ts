@@ -11,7 +11,7 @@ export function dl(rows: (string | number)[][], fname: string): void {
 }
 
 export const fmt = (v: number | null | undefined, d = 1): string =>
-  v == null ? '—' : parseFloat(String(v)).toFixed(d) + 'x'
+  v == null || v < 0 ? '—' : parseFloat(String(v)).toFixed(d) + 'x'
 
 export const fmtPct = (v: number | null | undefined): string =>
   v == null ? '—' : parseFloat(String(v)).toFixed(1) + '%'
