@@ -1,6 +1,6 @@
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { useData } from '../../context/DataContext'
-import { nid, fmtM, marg, segTagClass } from '../../lib/utils'
+import { nid, fmtLocalM, marg, segTagClass } from '../../lib/utils'
 import FinModal from '../display/FinModal'
 import type { FinFormData } from '../display/FinModal'
 import type { FinancialRow } from '../../types'
@@ -19,6 +19,11 @@ export default function FinancialsPanel() {
 
   const isQ = period === 'quarterly'
   const years = [...new Set(financials.map(f => f.year))].sort((a, b) => b - a)
+
+  const tickerCurrency = useMemo(
+    () => new Map(companies.map(c => [c.ticker, c.currency ?? 'USD'])),
+    [companies],
+  )
 
   function openAdd() { setModal({ record: null }) }
   function openEdit(id: number) { setModal({ record: financials.find(f => f.id === id) ?? null }) }
@@ -98,7 +103,7 @@ export default function FinancialsPanel() {
       </div>
 
       <p className="note" style={{ marginBottom: 10 }}>
-        All figures in $M. Margins auto-calculated as % of sales.{' '}
+        All figures in millions of local currency. Margins auto-calculated as % of sales.{' '}
         <span style={{ color: 'var(--amber)' }}>Q</span> = quarterly data,{' '}
         <span style={{ color: 'var(--text2)' }}>FY</span> = full year.
       </p>
@@ -111,7 +116,7 @@ export default function FinancialsPanel() {
               <th className="left">Name</th>
               <th className="left">Scope</th>
               <th style={{ textAlign: 'center' }}>Period</th>
-              <th>Sales ($M)</th>
+              <th>Sales (M)</th>
               <th>Gross profit</th>
               <th>GP%</th>
               <th>EBITDA</th>
@@ -139,8 +144,9 @@ export default function FinancialsPanel() {
               const periodLabel = r.quarter
                 ? <><span style={{ color: 'var(--amber)', fontWeight: 600 }}>{r.quarter}</span> {r.year}</>
                 : `FY${r.year}`
+              const currency = tickerCurrency.get(r.ticker) ?? 'USD'
               const valCell = (v: number | null | undefined) => (
-                <td className={`mono${isConsolidated ? '' : ' cell-dim'}`}>{fmtM(v)}</td>
+                <td className={`mono${isConsolidated ? '' : ' cell-dim'}`}>{fmtLocalM(v, currency)}</td>
               )
               return (
                 <tr key={r.id} className={`data-row${isConsolidated ? '' : ' sub-row'}`}>

@@ -7,6 +7,7 @@ export interface Company {
   ticker: string
   name: string
   segment: Segment
+  currency: string
   mcap: number | null
   ev_revenue: number | null
   ev_ebitda: number | null

@@ -44,6 +44,10 @@ export default function FinModal({ record, companies, onSave, onClose }: FinModa
     })
   }
 
+  const selectedCo = companies.find(c => c.id === parseInt(form.cid))
+  const currency = selectedCo?.currency ?? 'USD'
+  const cLabel = currency + 'M'
+
   const fld = (label: string, key: string, type = 'text', placeholder = '—') => (
     <div className="form-row">
       <label className="form-label">{label}</label>
@@ -79,7 +83,7 @@ export default function FinModal({ record, companies, onSave, onClose }: FinModa
         <p style={{ fontSize: 11, color: 'var(--text3)', marginBottom: 8 }}>
           Leave quarter blank for annual / full-year data. Use H1/H2 for semi-annual reporters.
         </p>
-        <div className="modal-section">P&amp;L figures ($M) — margins calculated automatically</div>
+        <div className="modal-section">P&amp;L figures ({cLabel}) — margins calculated automatically</div>
         <div className="form-grid">
           {fld('Sales / Revenue', 'sales', 'number')}
           {fld('Gross profit', 'gp', 'number')}
