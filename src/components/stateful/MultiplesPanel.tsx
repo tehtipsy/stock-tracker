@@ -144,12 +144,12 @@ export default function MultiplesPanel() {
             <tr className="median-row">
               <td className="left" colSpan={3} style={{ fontSize: 10, textTransform: 'uppercase', letterSpacing: '.05em', color: 'var(--text3)' }}>Median</td>
               <td className="mono">{meds['mcap'] != null ? '$' + parseFloat(String(meds['mcap'])).toLocaleString() : '—'}</td>
-              <td className="mono">{meds['ev_revenue'] != null ? meds['ev_revenue'].toFixed(1) + 'x' : '—'}</td>
-              <td className="mono">{meds['ev_ebitda'] != null ? meds['ev_ebitda'].toFixed(1) + 'x' : '—'}</td>
-              <td className="mono">{meds['ev_ebit'] != null ? meds['ev_ebit'].toFixed(1) + 'x' : '—'}</td>
-              <td className="mono">{meds['pe'] != null ? meds['pe'].toFixed(1) + 'x' : '—'}</td>
-              <td className="mono">{meds['ps'] != null ? meds['ps'].toFixed(1) + 'x' : '—'}</td>
-              <td className="mono">{meds['ev_nopat'] != null ? meds['ev_nopat'].toFixed(1) + 'x' : '—'}</td>
+              <td className="mono">{fmt(meds['ev_revenue'])}</td>
+              <td className="mono">{fmt(meds['ev_ebitda'])}</td>
+              <td className="mono">{fmt(meds['ev_ebit'])}</td>
+              <td className="mono">{fmt(meds['pe'])}</td>
+              <td className="mono">{fmt(meds['ps'])}</td>
+              <td className="mono">{fmt(meds['ev_nopat'])}</td>
               <td className="mono">{meds['ebitda_margin'] != null ? meds['ebitda_margin'].toFixed(1) + '%' : '—'}</td>
               <td colSpan={2} />
             </tr>
