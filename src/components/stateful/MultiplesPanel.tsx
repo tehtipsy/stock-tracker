@@ -3,6 +3,7 @@ import { useData } from '../../context/DataContext'
 import { nid, fmt, fmtPct, median, colorClass, segBadgeClass } from '../../lib/utils'
 import CompanyModal from '../display/CompanyModal'
 import type { CompanyFormData } from '../display/CompanyModal'
+import AddTickerModal from '../display/AddTickerModal'
 import type { Company } from '../../types'
 
 type MultiplesField = keyof Pick<Company, 'ticker' | 'mcap' | 'ev_revenue' | 'ev_ebitda' | 'ev_ebit' | 'pe' | 'ps' | 'ev_nopat' | 'ebitda_margin'>
@@ -23,7 +24,8 @@ export default function MultiplesPanel() {
   const [seg, setSeg] = useState('')
   const [sortField, setSortField] = useState<MultiplesField>('ev_ebitda')
   const [sortDir, setSortDir] = useState(1)
-  const [modal, setModal] = useState<{ company: Company | null } | null>(null)
+  const [modal, setModal] = useState<{ company: Company } | null>(null)
+  const [addModal, setAddModal] = useState(false)
 
   function handleSort(f: MultiplesField) {
     if (sortField === f) setSortDir(d => d * -1)
@@ -34,8 +36,11 @@ export default function MultiplesPanel() {
     if (f !== sortField) { setSortField(f); setSortDir(1) }
   }
 
-  function openAdd() { setModal({ company: null }) }
-  function openEdit(id: number) { setModal({ company: companies.find(c => c.id === id) ?? null }) }
+  function openAdd() { setAddModal(true) }
+  function openEdit(id: number) {
+    const company = companies.find(c => c.id === id)
+    if (company) setModal({ company })
+  }
   function closeModal() { setModal(null) }
 
   function saveCompany(data: CompanyFormData) {
@@ -46,6 +51,7 @@ export default function MultiplesPanel() {
       setCompanies(prev => [...prev, { id: nid(), ...data }])
     }
     closeModal()
+    setAddModal(false)
   }
 
   function delCompany(id: number) {
@@ -162,6 +168,12 @@ export default function MultiplesPanel() {
         Market data live from Yahoo Finance
       </p>
 
+      {addModal && (
+        <AddTickerModal
+          onSave={saveCompany}
+          onClose={() => setAddModal(false)}
+        />
+      )}
       {modal && (
         <CompanyModal
           company={modal.company}
