@@ -49,7 +49,7 @@ function toQuote(d: QuoteSummaryResult, usdRate: number | null, financials: Fina
     pe:         round2(d.summaryDetail?.trailingPE),
     ps:         round2(d.summaryDetail?.priceToSalesTrailing12Months),
     ev_revenue: round2(d.defaultKeyStatistics?.enterpriseToRevenue),
-    ev_ebitda:  round2(d.defaultKeyStatistics?.enterpriseToEbitda),
+    ev_ebitda:  ev != null && ebitda != null && ebitda !== 0 ? round2(ev / ebitda) : null,
     ev_ebit,
     ev_nopat,
     ebitda_margin,
