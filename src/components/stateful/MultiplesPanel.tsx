@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { useData } from '../../context/DataContext'
 import { nid, fmt, fmtPct, median, colorClass, segBadgeClass } from '../../lib/utils'
 import CompanyModal from '../display/CompanyModal'
@@ -19,7 +19,7 @@ const SORT_OPTIONS: { value: MultiplesField; label: string }[] = [
 ]
 
 export default function MultiplesPanel() {
-  const { companies, setCompanies, setFinancials, liveCompanies } = useData()
+  const { companies, setCompanies, setFinancials, financials, liveCompanies } = useData()
   const [seg, setSeg] = useState('')
   const [sortField, setSortField] = useState<MultiplesField>('ev_ebitda')
   const [sortDir, setSortDir] = useState(1)
@@ -63,6 +63,17 @@ export default function MultiplesPanel() {
     if (bv == null) return -1
     return sortDir * (av - bv)
   })
+
+  // Build a map of company id → latest annual FY year from financial data
+  const fyMap = useMemo(() => {
+    const map: Record<number, number> = {}
+    for (const f of financials) {
+      if (!f.quarter && (map[f.cid] == null || f.year > map[f.cid])) {
+        map[f.cid] = f.year
+      }
+    }
+    return map
+  }, [financials])
 
   const meds: Record<string, number | null> = {}
   ;(['ev_revenue', 'ev_ebitda', 'ev_ebit', 'pe', 'ps', 'ev_nopat', 'ebitda_margin', 'mcap'] as MultiplesField[]).forEach(f => {
@@ -123,7 +134,7 @@ export default function MultiplesPanel() {
                 {mkCell(c.ps, meds['ps'])}
                 {mkCell(c.ev_nopat, meds['ev_nopat'])}
                 {mkCell(c.ebitda_margin, meds['ebitda_margin'], true, fmtPct)}
-                <td className="cell-dim" style={{ fontSize: 11, textAlign: 'center' }}>{c.year || '—'}</td>
+                <td className="cell-dim" style={{ fontSize: 11, textAlign: 'center' }}>{fyMap[c.id] ?? c.year ?? '—'}</td>
                 <td style={{ whiteSpace: 'nowrap' }}>
                   <button style={{ fontSize: 11, padding: '2px 8px', height: 26, marginRight: 4 }} onClick={() => openEdit(c.id)}>Edit</button>
                   <button className="btn-danger" style={{ fontSize: 11, padding: '2px 8px', height: 26 }} onClick={() => delCompany(c.id)}>Del</button>
