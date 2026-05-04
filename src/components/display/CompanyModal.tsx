@@ -15,6 +15,7 @@ export default function CompanyModal({ company, onSave, onClose }: CompanyModalP
     ticker: company?.ticker ?? '',
     name: company?.name ?? '',
     segment: company?.segment ?? 'Diversified',
+    currency: company?.currency ?? 'USD',
     year: company?.year ?? 2024,
     mcap: company?.mcap ?? '',
     ev_revenue: company?.ev_revenue ?? '',
@@ -34,6 +35,7 @@ export default function CompanyModal({ company, onSave, onClose }: CompanyModalP
       ticker: String(form.ticker).trim().toUpperCase(),
       name: String(form.name).trim(),
       segment: form.segment as Company['segment'],
+      currency: String(form.currency).trim().toUpperCase() || 'USD',
       year: parseInt(String(form.year)) || 2024,
       mcap: num(form.mcap),
       ev_revenue: num(form.ev_revenue),
@@ -71,7 +73,15 @@ export default function CompanyModal({ company, onSave, onClose }: CompanyModalP
           </div>
           {fld('Fiscal year', 'year', 'number', '2024')}
         </div>
-        {fld('Market cap ($M)', 'mcap', 'number', 'e.g. 12000')}
+        <div className="form-grid">
+          <div className="form-row">
+            <label className="form-label">Reporting currency</label>
+            <select value={String(form.currency)} onChange={e => set('currency', e.target.value)}>
+              {['USD', 'EUR', 'GBP', 'CHF', 'JPY'].map(c => <option key={c}>{c}</option>)}
+            </select>
+          </div>
+        {fld('Market cap (USD M)', 'mcap', 'number', 'e.g. 12000')}
+        </div>
         <div className="modal-section">Multiples</div>
         <div className="form-grid-3">
           {fld('EV/Revenue', 'ev_revenue', 'number', '—', { step: 0.1 })}

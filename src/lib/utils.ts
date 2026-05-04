@@ -16,8 +16,25 @@ export const fmt = (v: number | null | undefined, d = 1): string =>
 export const fmtPct = (v: number | null | undefined): string =>
   v == null ? '—' : parseFloat(String(v)).toFixed(1) + '%'
 
+const CURRENCY_SYMBOLS: Record<string, string> = {
+  USD: '$',
+  EUR: '€',
+  GBP: '£',
+  CHF: 'CHF ',
+  JPY: '¥',
+}
+
 export const fmtM = (v: number | null | undefined): string =>
   v == null ? '—' : '$' + parseFloat(String(v)).toLocaleString(undefined, { maximumFractionDigits: 0 }) + 'M'
+
+export const fmtLocalM = (v: number | null | undefined, currency = 'USD'): string => {
+  if (v == null) return '—'
+  const sym = CURRENCY_SYMBOLS[currency] ?? currency + ' '
+  return sym + parseFloat(String(v)).toLocaleString(undefined, { maximumFractionDigits: 0 }) + 'M'
+}
+
+export const currencyLabel = (currency = 'USD'): string =>
+  (CURRENCY_SYMBOLS[currency] ?? currency) + 'M'
 
 export const marg = (n: number | null | undefined, d: number | null | undefined): number | null =>
   n == null || d == null || d === 0 ? null : (n / d * 100)

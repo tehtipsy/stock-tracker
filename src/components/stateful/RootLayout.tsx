@@ -36,7 +36,7 @@ export default function RootLayout() {
       const isQ = (document.getElementById('f-period') as HTMLSelectElement | null)?.value === 'quarterly'
       const expRows = financials.filter(f => isQ ? !!f.quarter : !f.quarter)
       const rows: (string | number)[][] = [
-        ['Ticker', 'Name', 'Scope', 'Year', 'Quarter', 'Sales($M)', 'Gross Profit', 'GP%', 'EBITDA', 'EBITDA%', 'EBIT', 'EBIT%', 'Net Profit', 'Net%'],
+        ['Ticker', 'Name', 'Scope', 'Year', 'Quarter', 'Sales(M)', 'Gross Profit', 'GP%', 'EBITDA', 'EBITDA%', 'EBIT', 'EBIT%', 'Net Profit', 'Net%'],
         ...expRows.map(f => {
           const gp = f.gp && f.sales ? (f.gp / f.sales * 100).toFixed(1) : ''
           const eb = f.ebitda && f.sales ? (f.ebitda / f.sales * 100).toFixed(1) : ''

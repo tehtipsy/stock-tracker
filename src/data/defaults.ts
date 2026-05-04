@@ -10,15 +10,15 @@ interface Defaults {
 // Sources: company press releases, CNBC, Gurufocus, StockAnalysis, Morningstar (Apr 2026)
 const DEFAULTS: Defaults = {
   companies: [
-    {id:1,ticker:'IFF',name:'IFF',segment:'Diversified',mcap:18100,ev_revenue:2.8,ev_ebitda:14.4,ev_ebit:27.3,pe:null,ps:1.7,ev_nopat:null,ebitda_margin:19.2,year:2024},
-    {id:2,ticker:'GIVN',name:'Givaudan',segment:'Diversified',mcap:28500,ev_revenue:4.0,ev_ebitda:21.0,ev_ebit:27.0,pe:26.1,ps:3.5,ev_nopat:null,ebitda_margin:23.8,year:2024},
-    {id:3,ticker:'SY1',name:'Symrise',segment:'Diversified',mcap:11000,ev_revenue:2.4,ev_ebitda:11.6,ev_ebit:18.1,pe:23.0,ps:2.1,ev_nopat:null,ebitda_margin:20.7,year:2024},
-    {id:4,ticker:'DSFIR',name:'dsm-firmenich',segment:'Diversified',mcap:null,ev_revenue:2.8,ev_ebitda:18.0,ev_ebit:null,pe:null,ps:null,ev_nopat:null,ebitda_margin:19.0,year:2024},
-    {id:5,ticker:'KRY',name:'Kerry Group',segment:'Flavor',mcap:10300,ev_revenue:1.4,ev_ebitda:9.2,ev_ebit:13.8,pe:14.8,ps:1.2,ev_nopat:null,ebitda_margin:15.7,year:2024},
-    {id:6,ticker:'SXT',name:'Sensient Technologies',segment:'Flavor',mcap:2400,ev_revenue:1.9,ev_ebitda:12.0,ev_ebit:15.7,pe:17.1,ps:1.5,ev_nopat:null,ebitda_margin:16.1,year:2024},
-    {id:7,ticker:'RBT',name:'Robertet',segment:'Fragrance',mcap:760,ev_revenue:1.0,ev_ebitda:5.0,ev_ebit:6.4,pe:17.4,ps:0.9,ev_nopat:null,ebitda_margin:19.4,year:2024},
-    {id:8,ticker:'4958',name:'T. Hasegawa',segment:'Flavor',mcap:830,ev_revenue:1.5,ev_ebitda:10.0,ev_ebit:13.2,pe:18.0,ps:1.4,ev_nopat:null,ebitda_margin:15.0,year:2024},
-    {id:9,ticker:'4914',name:'Takasago',segment:'Fragrance',mcap:1380,ev_revenue:1.1,ev_ebitda:9.1,ev_ebit:12.0,pe:14.2,ps:1.0,ev_nopat:null,ebitda_margin:12.2,year:2024},
+    {id:1,ticker:'IFF',name:'IFF',segment:'Diversified',currency:'USD',mcap:18100,ev_revenue:2.8,ev_ebitda:14.4,ev_ebit:27.3,pe:null,ps:1.7,ev_nopat:null,ebitda_margin:19.2,year:2024},
+    {id:2,ticker:'GIVN',name:'Givaudan',segment:'Diversified',currency:'CHF',mcap:28500,ev_revenue:4.0,ev_ebitda:21.0,ev_ebit:27.0,pe:26.1,ps:3.5,ev_nopat:null,ebitda_margin:23.8,year:2024},
+    {id:3,ticker:'SY1',name:'Symrise',segment:'Diversified',currency:'EUR',mcap:11000,ev_revenue:2.4,ev_ebitda:11.6,ev_ebit:18.1,pe:23.0,ps:2.1,ev_nopat:null,ebitda_margin:20.7,year:2024},
+    {id:4,ticker:'DSFIR',name:'dsm-firmenich',segment:'Diversified',currency:'EUR',mcap:null,ev_revenue:2.8,ev_ebitda:18.0,ev_ebit:null,pe:null,ps:null,ev_nopat:null,ebitda_margin:19.0,year:2024},
+    {id:5,ticker:'KRY',name:'Kerry Group',segment:'Flavor',currency:'EUR',mcap:10300,ev_revenue:1.4,ev_ebitda:9.2,ev_ebit:13.8,pe:14.8,ps:1.2,ev_nopat:null,ebitda_margin:15.7,year:2024},
+    {id:6,ticker:'SXT',name:'Sensient Technologies',segment:'Flavor',currency:'USD',mcap:2400,ev_revenue:1.9,ev_ebitda:12.0,ev_ebit:15.7,pe:17.1,ps:1.5,ev_nopat:null,ebitda_margin:16.1,year:2024},
+    {id:7,ticker:'RBT',name:'Robertet',segment:'Fragrance',currency:'EUR',mcap:760,ev_revenue:1.0,ev_ebitda:5.0,ev_ebit:6.4,pe:17.4,ps:0.9,ev_nopat:null,ebitda_margin:19.4,year:2024},
+    {id:8,ticker:'4958',name:'T. Hasegawa',segment:'Flavor',currency:'JPY',mcap:830,ev_revenue:1.5,ev_ebitda:10.0,ev_ebit:13.2,pe:18.0,ps:1.4,ev_nopat:null,ebitda_margin:15.0,year:2024},
+    {id:9,ticker:'4914',name:'Takasago',segment:'Fragrance',currency:'JPY',mcap:1380,ev_revenue:1.1,ev_ebitda:9.1,ev_ebit:12.0,pe:14.2,ps:1.0,ev_nopat:null,ebitda_margin:12.2,year:2024},
   ],
   financials: [
     // IFF FY2024
