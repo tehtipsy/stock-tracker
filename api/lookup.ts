@@ -14,6 +14,8 @@ const yf = new YahooFinance({
 
 const MODULES = ['price', 'defaultKeyStatistics', 'summaryDetail'] as const
 const FTS_PERIOD1 = '2021-01-01'
+const FX_MAX_ATTEMPTS = 2
+const FX_RETRY_DELAY_MS = 400
 
 function round2(v: number | null | undefined): number | null {
   if (v == null || !isFinite(v)) return null
@@ -101,15 +103,23 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
     const currency = d.price?.currency ?? 'USD'
     const name = d.price?.shortName ?? d.price?.longName ?? symbol
 
-    // Fetch USD exchange rate for non-USD currencies
+    // Fetch USD exchange rate for non-USD currencies.
+    // Retry once (after FX_RETRY_DELAY_MS) to survive transient Yahoo Finance failures.
     let usdRate: number | null = 1
     if (currency !== 'USD') {
-      try {
-        const fx = await yf.quoteSummary(`${currency}USD=X`, { modules: ['price'] })
-        const rate = fx.price?.regularMarketPrice
-        usdRate = rate != null && isFinite(rate) && rate > 0 ? rate : null
-      } catch {
-        usdRate = null
+      usdRate = null
+      for (let attempt = 0; attempt < FX_MAX_ATTEMPTS; attempt++) {
+        try {
+          if (attempt > 0) await new Promise(r => setTimeout(r, FX_RETRY_DELAY_MS))
+          const fx = await yf.quoteSummary(`${currency}USD=X`, { modules: ['price'] })
+          const rate = fx.price?.regularMarketPrice
+          if (rate != null && isFinite(rate) && rate > 0) { usdRate = rate; break }
+        } catch {
+          // continue to next attempt
+        }
+      }
+      if (usdRate == null) {
+        console.warn(`[lookup] Could not fetch USD rate for ${currency} after ${FX_MAX_ATTEMPTS} attempts; mcap will be omitted.`)
       }
     }
 
