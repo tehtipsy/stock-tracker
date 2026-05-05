@@ -42,15 +42,24 @@ function extractFinancials(rows: FundamentalsTimeSeriesFinancialsResult[]): Fina
 }
 
 function toQuote(d: QuoteSummaryResult, usdRate: number | null, financials: FinancialData): LiveQuote {
-  const rawMcap = d.price?.marketCap
+  // Use price.marketCap if available; fall back to price × sharesOutstanding
+  // Both sources are in the security's native currency (absolute value, not millions)
+  const rawMcap =
+    d.price?.marketCap ??
+    (d.price?.regularMarketPrice != null && d.defaultKeyStatistics?.sharesOutstanding != null
+      ? d.price.regularMarketPrice * d.defaultKeyStatistics.sharesOutstanding
+      : null)
   const ev = d.defaultKeyStatistics?.enterpriseValue
   const { ebit, ebitda, totalRevenue, taxRate } = financials
   const ev_ebit = ev != null && ebit != null && ebit !== 0 ? round2(ev / ebit) : null
   const nopat = ebit != null && taxRate != null ? ebit * (1 - taxRate) : null
   const ev_nopat = ev != null && nopat != null && nopat !== 0 ? round2(ev / nopat) : null
   const ebitda_margin = ebitda != null && totalRevenue != null && totalRevenue !== 0 ? round2(ebitda / totalRevenue * 100) : null
+  // When FX rate is unavailable, fall back to 1 so mcap is populated in local currency
+  // rather than being dropped entirely. This keeps the field visible as an approximation.
+  const effectiveRate = usdRate ?? 1
   return {
-    mcap:       rawMcap != null && usdRate != null ? Math.round((rawMcap * usdRate) / 1e6) : null,
+    mcap:       rawMcap != null ? Math.round((rawMcap * effectiveRate) / 1e6) : null,
     pe:         round2(d.summaryDetail?.trailingPE),
     ps:         round2(d.summaryDetail?.priceToSalesTrailing12Months),
     ev_revenue: round2(d.defaultKeyStatistics?.enterpriseToRevenue),
