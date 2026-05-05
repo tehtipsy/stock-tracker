@@ -55,11 +55,10 @@ function toQuote(d: QuoteSummaryResult, usdRate: number | null, financials: Fina
   const nopat = ebit != null && taxRate != null ? ebit * (1 - taxRate) : null
   const ev_nopat = ev != null && nopat != null && nopat !== 0 ? round2(ev / nopat) : null
   const ebitda_margin = ebitda != null && totalRevenue != null && totalRevenue !== 0 ? round2(ebitda / totalRevenue * 100) : null
-  // When FX rate is unavailable, fall back to 1 so mcap is populated in local currency
-  // rather than being dropped entirely. This keeps the field visible as an approximation.
-  const effectiveRate = usdRate ?? 1
   return {
-    mcap:       rawMcap != null ? Math.round((rawMcap * effectiveRate) / 1e6) : null,
+    // mcap is always stored in USD millions; null when FX rate is unavailable to
+    // avoid silently displaying a local-currency value labeled as USD.
+    mcap:       rawMcap != null && usdRate != null ? Math.round((rawMcap * usdRate) / 1e6) : null,
     pe:         round2(d.summaryDetail?.trailingPE),
     ps:         round2(d.summaryDetail?.priceToSalesTrailing12Months),
     ev_revenue: round2(d.defaultKeyStatistics?.enterpriseToRevenue),
