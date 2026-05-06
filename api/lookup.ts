@@ -104,10 +104,14 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
     const name = d.price?.shortName ?? d.price?.longName ?? symbol
 
     // Fetch USD exchange rate for non-USD currencies.
-    // Retry once (after FX_RETRY_DELAY_MS) to survive transient Yahoo Finance failures.
+    // Strategy 1: direct pair  {CURRENCY}USD=X  (e.g. EURUSD=X)
+    // Strategy 2: inverted pair USD{CURRENCY}=X  (e.g. USDILS=X → 1/rate)
+    // Each strategy retries FX_MAX_ATTEMPTS times with FX_RETRY_DELAY_MS between attempts.
     let usdRate: number | null = 1
     if (currency !== 'USD') {
       usdRate = null
+
+      // Strategy 1: direct pair
       for (let attempt = 0; attempt < FX_MAX_ATTEMPTS; attempt++) {
         try {
           if (attempt > 0) await new Promise(r => setTimeout(r, FX_RETRY_DELAY_MS))
@@ -118,8 +122,23 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
           // continue to next attempt
         }
       }
+
+      // Strategy 2: inverted pair (e.g. USDILS=X → 1/rate) when direct pair is unavailable
       if (usdRate == null) {
-        console.warn(`[lookup] Could not fetch USD rate for ${currency} after ${FX_MAX_ATTEMPTS} attempts; mcap will be omitted.`)
+        for (let attempt = 0; attempt < FX_MAX_ATTEMPTS; attempt++) {
+          try {
+            if (attempt > 0) await new Promise(r => setTimeout(r, FX_RETRY_DELAY_MS))
+            const fx = await yf.quoteSummary(`USD${currency}=X`, { modules: ['price'] })
+            const rate = fx.price?.regularMarketPrice
+            if (rate != null && isFinite(rate) && rate > 0) { usdRate = 1 / rate; break }
+          } catch {
+            // continue to next attempt
+          }
+        }
+      }
+
+      if (usdRate == null) {
+        console.warn(`[lookup] Could not fetch USD rate for ${currency}; mcap will be omitted.`)
       }
     }
 
