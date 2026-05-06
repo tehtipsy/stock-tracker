@@ -52,6 +52,12 @@ export interface QuotesResponse {
   fetchedAt: string
 }
 
+export interface LookupResponse {
+  name: string
+  currency: string
+  quote: LiveQuote
+}
+
 // ── Context types ───────────────────────────────────────────────────────────
 
 export interface DataContextValue {
