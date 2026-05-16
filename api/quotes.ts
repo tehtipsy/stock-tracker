@@ -14,6 +14,7 @@ import {
   toQuote,
   yf,
 } from './lib/quoteService'
+const FX_REFILL_DELAY_MS = 400
 
 // Map from app ticker → Yahoo Finance symbol
 const TICKER_MAP: Record<string, string> = {
@@ -74,7 +75,11 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
 
   // Fetch USD exchange rates for all non-USD currencies encountered
   const fxRates = await fetchFxRates([...currencySet])
-  await populateFxRates(fxRates, [...currencySet])
+  const missingFxCurrencies = [...currencySet].filter(currency => fxRates[currency] == null)
+  if (missingFxCurrencies.length) {
+    await new Promise(r => setTimeout(r, FX_REFILL_DELAY_MS))
+    await populateFxRates(fxRates, missingFxCurrencies)
+  }
 
   const quotes: Record<string, LiveQuote> = {}
   for (let i = 0; i < entries.length; i++) {
