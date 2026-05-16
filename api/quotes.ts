@@ -4,7 +4,7 @@
 import type { IncomingMessage, ServerResponse } from 'http'
 import type { FundamentalsTimeSeriesFinancialsResult } from 'yahoo-finance2/modules/fundamentalsTimeSeries'
 import type { LiveQuote, QuotesResponse } from '../src/types'
-import { rejectNonGet, sendJson } from './lib/http'
+import { rejectNonGet, sendJson } from './lib/http.js'
 import {
   EMPTY_FINANCIAL_DATA,
   extractFinancials,
@@ -13,7 +13,7 @@ import {
   MODULES,
   toQuote,
   yf,
-} from './lib/quoteService'
+} from './lib/quoteService.js'
 const FX_REFILL_DELAY_MS = 400
 
 // Map from app ticker → Yahoo Finance symbol

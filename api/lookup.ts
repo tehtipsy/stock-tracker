@@ -4,7 +4,7 @@
 import type { IncomingMessage, ServerResponse } from 'http'
 import type { FundamentalsTimeSeriesFinancialsResult } from 'yahoo-finance2/modules/fundamentalsTimeSeries'
 import type { LookupResponse } from '../src/types'
-import { rejectNonGet, sendJson } from './lib/http'
+import { rejectNonGet, sendJson } from './lib/http.js'
 import {
   EMPTY_FINANCIAL_DATA,
   extractFinancials,
@@ -14,7 +14,7 @@ import {
   MODULES,
   toQuote,
   yf,
-} from './lib/quoteService'
+} from './lib/quoteService.js'
 export default async function handler(req: IncomingMessage, res: ServerResponse): Promise<void> {
   if (rejectNonGet(req, res)) return
 
