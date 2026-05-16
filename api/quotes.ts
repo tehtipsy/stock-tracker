@@ -27,6 +27,7 @@ const TICKER_MAP: Record<string, string> = {
   RBT:    'RBT.PA',
   '4958': '4958.T',
   '4914': '4914.T',
+  TRPZ:   'TRPZ.TA',
 }
 
 /** Fetch 1-unit-of-currency → USD rates for each non-USD currency. */

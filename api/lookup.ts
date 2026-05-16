@@ -15,6 +15,7 @@ import {
   toQuote,
   yf,
 } from './lib/quoteService.js'
+
 export default async function handler(req: IncomingMessage, res: ServerResponse): Promise<void> {
   if (rejectNonGet(req, res)) return
 
