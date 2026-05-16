@@ -1,5 +1,5 @@
 import { Outlet, Link, useRouterState } from '@tanstack/react-router'
-import { useMemo, useEffect, useState } from 'react'
+import { useMemo, useEffect, useState, useRef } from 'react'
 import { DataContext } from '../../context/DataContext'
 import { useStorage } from '../../hooks/useStorage'
 import { useQuotes } from '../../hooks/useQuotes'
@@ -23,6 +23,7 @@ export default function RootLayout() {
   const [authLoading, setAuthLoading] = useState(true)
   const [authError, setAuthError] = useState<string | null>(null)
   const [loadedUserCompanies, setLoadedUserCompanies] = useState(false)
+  const lastSyncedCompanies = useRef<string>('')
 
   const liveCompanies = useMemo(() => mergeQuotes(companies), [companies, mergeQuotes])
 
@@ -50,6 +51,7 @@ export default function RootLayout() {
   useEffect(() => {
     if (!authUser) {
       setLoadedUserCompanies(true)
+      lastSyncedCompanies.current = ''
       return
     }
     let cancelled = false
@@ -78,19 +80,28 @@ export default function RootLayout() {
 
   useEffect(() => {
     if (!authUser || !loadedUserCompanies) return
-    void fetch('/api/companies', {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        companies: companies.filter(c => !DEFAULT_COMPANY_IDS.has(c.id)),
-      }),
-    })
+    const userAdded = companies.filter(c => !DEFAULT_COMPANY_IDS.has(c.id))
+    const payload = JSON.stringify(userAdded)
+    if (payload === lastSyncedCompanies.current) return
+    const timeout = setTimeout(() => {
+      void fetch('/api/companies', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ companies: userAdded }),
+      })
+        .then(res => {
+          if (!res.ok) throw new Error(`API ${res.status}`)
+          lastSyncedCompanies.current = payload
+        })
+        .catch(err => setAuthError((err as Error).message))
+    }, 300)
+    return () => clearTimeout(timeout)
   }, [authUser, loadedUserCompanies, companies])
 
   async function login() {
     const username = usernameInput.trim()
     if (!username) {
-      setAuthError('Username is required')
+      setAuthError('username is required')
       return
     }
     setAuthLoading(true)
@@ -118,7 +129,7 @@ export default function RootLayout() {
     try {
       await fetch('/api/logout', { method: 'POST' })
       setAuthUser(null)
-      setCompanies(JSON.parse(JSON.stringify(DEFAULTS.companies)) as Company[])
+      setCompanies(structuredClone(DEFAULTS.companies))
     } catch (err) {
       setAuthError((err as Error).message)
     } finally {
@@ -128,8 +139,8 @@ export default function RootLayout() {
 
   function resetData() {
     if (!confirm('Reset all data to defaults? This will clear any edits you have made.')) return
-    setCompanies(JSON.parse(JSON.stringify(DEFAULTS.companies)) as Company[])
-    setFinancials(JSON.parse(JSON.stringify(DEFAULTS.financials)) as FinancialRow[])
+    setCompanies(structuredClone(DEFAULTS.companies))
+    setFinancials(structuredClone(DEFAULTS.financials))
   }
 
   function exportCSV() {
@@ -211,7 +222,7 @@ export default function RootLayout() {
         {authError && <p className="note" style={{ marginBottom: 10, color: 'var(--red)' }}>{authError}</p>}
         {authUser
           ? <Outlet />
-          : <p className="note">Log in from the header to manage companies. Session middleware protects user company persistence.</p>}
+          : <p className="note">Log in from the header to save and sync your added companies.</p>}
       </main>
     </DataContext.Provider>
   )

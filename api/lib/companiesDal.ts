@@ -6,14 +6,16 @@ interface CompanyStore {
   [username: string]: Company[]
 }
 
-const DATA_DIR = '/tmp/stock-tracker'
+const DATA_DIR = process.env.COMPANIES_DATA_DIR ?? '/tmp/stock-tracker'
 const DATA_FILE = path.join(DATA_DIR, 'companies.json')
 
 async function readStore(): Promise<CompanyStore> {
   try {
     const content = await readFile(DATA_FILE, 'utf8')
     return JSON.parse(content) as CompanyStore
-  } catch {
+  } catch (err) {
+    if ((err as NodeJS.ErrnoException).code === 'ENOENT') return {}
+    console.error('[companiesDal] failed to read store:', err)
     return {}
   }
 }

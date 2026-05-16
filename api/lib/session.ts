@@ -1,4 +1,4 @@
-import { randomUUID } from 'crypto'
+import { createHmac } from 'crypto'
 import type { IncomingMessage, ServerResponse } from 'http'
 
 interface SessionData {
@@ -7,13 +7,10 @@ interface SessionData {
 
 const COOKIE_NAME = 'ff_session'
 const SESSION_TTL_SECONDS = 60 * 60 * 24 * 7
-
-function getStore(): Map<string, SessionData> {
-  const key = '__ffSessionStore'
-  const globalStore = globalThis as typeof globalThis & { [key: string]: Map<string, SessionData> | undefined }
-  if (!globalStore[key]) globalStore[key] = new Map<string, SessionData>()
-  return globalStore[key]
+if (process.env.NODE_ENV === 'production' && !process.env.SESSION_SECRET) {
+  throw new Error('SESSION_SECRET must be set in production')
 }
+const SESSION_SECRET = process.env.SESSION_SECRET ?? 'stock-tracker-dev-secret'
 
 function parseCookies(req: IncomingMessage): Record<string, string> {
   const header = req.headers.cookie
@@ -30,23 +27,29 @@ function cookieHeader(name: string, value: string, maxAge: number): string {
   return `${name}=${encodeURIComponent(value)}; Path=/; HttpOnly; SameSite=Lax; Max-Age=${maxAge}`
 }
 
+function signUsername(username: string): string {
+  return createHmac('sha256', SESSION_SECRET).update(username).digest('hex')
+}
+
 export function createSession(res: ServerResponse, username: string): string {
-  const token = randomUUID()
-  getStore().set(token, { username })
+  const token = `${username}.${signUsername(username)}`
   res.setHeader('Set-Cookie', cookieHeader(COOKIE_NAME, token, SESSION_TTL_SECONDS))
   return token
 }
 
-export function destroySession(req: IncomingMessage, res: ServerResponse): void {
-  const token = parseCookies(req)[COOKIE_NAME]
-  if (token) getStore().delete(token)
+export function destroySession(_req: IncomingMessage, res: ServerResponse): void {
   res.setHeader('Set-Cookie', cookieHeader(COOKIE_NAME, '', 0))
 }
 
 export function getSession(req: IncomingMessage): SessionData | null {
   const token = parseCookies(req)[COOKIE_NAME]
   if (!token) return null
-  return getStore().get(token) ?? null
+  const parts = token.split('.')
+  if (parts.length !== 2) return null
+  const [username, signature] = parts
+  if (!username || !signature) return null
+  if (signUsername(username) !== signature) return null
+  return { username }
 }
 
 export function requireSession(req: IncomingMessage, res: ServerResponse): SessionData | null {
