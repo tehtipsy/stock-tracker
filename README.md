@@ -2,7 +2,7 @@
 
 A Flavours & Fragrances sector comparables dashboard — live valuation multiples, historical financials, and segment breakdowns for IFF, Givaudan, Symrise, Kerry, Sensient, Robertet, dsm-firmenich, T. Hasegawa, and Takasago.
 
-Market data (**market cap, P/E, P/S, EV/Revenue, EV/EBITDA**) is fetched live from Yahoo Finance every time the page loads. Everything else (EV/EBIT, EV/NOPAT, historical financials, manually added companies) is stored in your browser's `localStorage` and survives page refreshes.
+Market data (**market cap, P/E, P/S, EV/Revenue, EV/EBITDA**) is fetched live from Yahoo Finance every time the page loads. Historical financials stay in browser `localStorage`, while user-added companies are persisted per logged-in user through the `/api/companies` DAL endpoint behind session middleware.
 
 ---
 
@@ -70,6 +70,11 @@ Serves the `dist/` folder locally for a production smoke-test.
 ```
 stock-tracker/
 ├── api/
+│   ├── companies.ts       # Session-protected companies persistence endpoint (DAL-backed)
+│   ├── login.ts           # Login endpoint (creates session cookie)
+│   ├── logout.ts          # Logout endpoint (destroys session cookie)
+│   ├── session.ts         # Session status endpoint for UI
+│   ├── lib/               # Session middleware + data access layer helpers
 │   └── quotes.ts          # Vercel serverless function — fetches Yahoo Finance
 ├── src/
 │   ├── components/
@@ -165,6 +170,7 @@ No environment variables are required. The `/api/quotes` function calls the Yaho
 | **Segment filter** | Use the dropdown on the left of the toolbar to show only Flavor, Fragrance, Ingredients, or Diversified companies |
 | **Sort** | Click any column header, or use the sort dropdown in the toolbar |
 | **Add a company** | Click **+ Add company** and fill in the form |
+| **Login** | Enter a username in the header login menu to start a session; logout is in the same menu |
 | **Edit / Delete** | Use the **Edit** / **Del** buttons at the end of each row |
 | **Live badge** | The `● live` badge in the header indicates market data was fetched successfully from Yahoo Finance; click **↻** to refresh |
 | **Export CSV** | Click **Export CSV** in the header to download the current view |
@@ -198,4 +204,4 @@ Color coding in the multiples columns:
 | Language | TypeScript 6 (strict) |
 | Market data | [yahoo-finance2](https://github.com/gadicc/node-yahoo-finance2) v3 |
 | Deployment | Vercel (serverless functions + SPA rewrite) |
-| Persistence | Browser `localStorage` |
+| Persistence | Browser `localStorage` + DAL-backed `/api/companies` for user-added companies |

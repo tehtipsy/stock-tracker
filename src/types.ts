@@ -58,6 +58,15 @@ export interface LookupResponse {
   quote: LiveQuote
 }
 
+export interface SessionResponse {
+  authenticated: boolean
+  username: string | null
+}
+
+export interface CompaniesResponse {
+  companies: Company[]
+}
+
 // ── Context types ───────────────────────────────────────────────────────────
 
 export interface DataContextValue {

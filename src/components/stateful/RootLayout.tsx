@@ -1,12 +1,14 @@
 import { Outlet, Link, useRouterState } from '@tanstack/react-router'
-import { useMemo } from 'react'
+import { useMemo, useEffect, useState } from 'react'
 import { DataContext } from '../../context/DataContext'
 import { useStorage } from '../../hooks/useStorage'
 import { useQuotes } from '../../hooks/useQuotes'
 import { useDarkMode } from '../../hooks/useDarkMode'
 import { dl } from '../../lib/utils'
 import DEFAULTS from '../../data/defaults'
-import type { Company, FinancialRow } from '../../types'
+import type { Company, FinancialRow, CompaniesResponse, SessionResponse } from '../../types'
+
+const DEFAULT_COMPANY_IDS = new Set(DEFAULTS.companies.map(c => c.id))
 
 export default function RootLayout() {
   const routerState = useRouterState()
@@ -16,8 +18,113 @@ export default function RootLayout() {
   const [financials, setFinancials] = useStorage<FinancialRow[]>('ff_financials', DEFAULTS.financials)
   const { loading, error, refresh, mergeQuotes } = useQuotes()
   const { theme, toggle } = useDarkMode()
+  const [usernameInput, setUsernameInput] = useState('')
+  const [authUser, setAuthUser] = useState<string | null>(null)
+  const [authLoading, setAuthLoading] = useState(true)
+  const [authError, setAuthError] = useState<string | null>(null)
+  const [loadedUserCompanies, setLoadedUserCompanies] = useState(false)
 
   const liveCompanies = useMemo(() => mergeQuotes(companies), [companies, mergeQuotes])
+
+  useEffect(() => {
+    let cancelled = false
+    async function initSession() {
+      setAuthLoading(true)
+      setAuthError(null)
+      try {
+        const res = await fetch('/api/session')
+        const data = await res.json() as SessionResponse
+        if (!res.ok) throw new Error(`API ${res.status}`)
+        if (cancelled) return
+        setAuthUser(data.authenticated ? data.username : null)
+      } catch (err) {
+        if (!cancelled) setAuthError((err as Error).message)
+      } finally {
+        if (!cancelled) setAuthLoading(false)
+      }
+    }
+    void initSession()
+    return () => { cancelled = true }
+  }, [])
+
+  useEffect(() => {
+    if (!authUser) {
+      setLoadedUserCompanies(true)
+      return
+    }
+    let cancelled = false
+    async function loadUserCompanies() {
+      setLoadedUserCompanies(false)
+      try {
+        const res = await fetch('/api/companies')
+        const data = await res.json() as CompaniesResponse & { error?: string }
+        if (!res.ok) throw new Error(data.error ?? `API ${res.status}`)
+        if (cancelled) return
+        setCompanies(prev => {
+          const defaults = prev.filter(c => DEFAULT_COMPANY_IDS.has(c.id))
+          const byTicker = new Set(defaults.map(c => c.ticker))
+          const additions = data.companies.filter(c => !byTicker.has(c.ticker))
+          return [...defaults, ...additions]
+        })
+      } catch (err) {
+        if (!cancelled) setAuthError((err as Error).message)
+      } finally {
+        if (!cancelled) setLoadedUserCompanies(true)
+      }
+    }
+    void loadUserCompanies()
+    return () => { cancelled = true }
+  }, [authUser, setCompanies])
+
+  useEffect(() => {
+    if (!authUser || !loadedUserCompanies) return
+    void fetch('/api/companies', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        companies: companies.filter(c => !DEFAULT_COMPANY_IDS.has(c.id)),
+      }),
+    })
+  }, [authUser, loadedUserCompanies, companies])
+
+  async function login() {
+    const username = usernameInput.trim()
+    if (!username) {
+      setAuthError('Username is required')
+      return
+    }
+    setAuthLoading(true)
+    setAuthError(null)
+    try {
+      const res = await fetch('/api/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username }),
+      })
+      const data = await res.json() as SessionResponse & { error?: string }
+      if (!res.ok) throw new Error(data.error ?? `API ${res.status}`)
+      setAuthUser(data.username)
+      setUsernameInput('')
+    } catch (err) {
+      setAuthError((err as Error).message)
+    } finally {
+      setAuthLoading(false)
+    }
+  }
+
+  async function logout() {
+    setAuthLoading(true)
+    setAuthError(null)
+    try {
+      await fetch('/api/logout', { method: 'POST' })
+      setAuthUser(null)
+      setCompanies(JSON.parse(JSON.stringify(DEFAULTS.companies)) as Company[])
+    } catch (err) {
+      setAuthError((err as Error).message)
+    } finally {
+      setAuthLoading(false)
+    }
+  }
 
   function resetData() {
     if (!confirm('Reset all data to defaults? This will clear any edits you have made.')) return
@@ -62,6 +169,25 @@ export default function RootLayout() {
         </div>
         <div className="spacer" />
         <div className="header-actions">
+          {authUser
+            ? (
+                <>
+                  <span className="user-badge">user: {authUser}</span>
+                  <button onClick={() => { void logout() }} disabled={authLoading}>Logout</button>
+                </>
+              )
+            : (
+                <div className="login-menu">
+                  <input
+                    value={usernameInput}
+                    onChange={e => setUsernameInput(e.target.value)}
+                    placeholder="username"
+                    disabled={authLoading}
+                    onKeyDown={e => e.key === 'Enter' && void login()}
+                  />
+                  <button className="btn-primary" onClick={() => { void login() }} disabled={authLoading}>Login</button>
+                </div>
+              )}
           {loading
             ? <span className="live-badge stale">loading…</span>
             : error
@@ -82,7 +208,10 @@ export default function RootLayout() {
         </div>
       </header>
       <main>
-        <Outlet />
+        {authError && <p className="note" style={{ marginBottom: 10, color: 'var(--red)' }}>{authError}</p>}
+        {authUser
+          ? <Outlet />
+          : <p className="note">Log in from the header to manage companies. Session middleware protects user company persistence.</p>}
       </main>
     </DataContext.Provider>
   )
