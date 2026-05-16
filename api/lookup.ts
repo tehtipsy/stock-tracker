@@ -152,7 +152,9 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
     const quote = toQuote(d, usdRate, financials)
     const fxRateMissing = currency !== 'USD' && rawMarketCap(d) != null && usdRate == null
 
-    const body: LookupResponse = { name, currency, quote, fxRateMissing }
+    const body: LookupResponse = fxRateMissing
+      ? { name, currency, quote, fxRateMissing: true }
+      : { name, currency, quote }
 
     res.writeHead(200, { 'Content-Type': 'application/json' })
     res.end(JSON.stringify(body))

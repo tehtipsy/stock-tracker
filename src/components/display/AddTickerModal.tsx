@@ -26,7 +26,8 @@ export default function AddTickerModal({ onSave, onClose }: AddTickerModalProps)
 
   async function handleAdd() {
     if (pendingCompany) {
-      onSave({ ...pendingCompany, mcap: num(manualMcap) })
+      const mcap = manualMcap.trim() === '' ? pendingCompany.mcap : num(manualMcap)
+      onSave({ ...pendingCompany, mcap })
       return
     }
 
@@ -61,7 +62,7 @@ export default function AddTickerModal({ onSave, onClose }: AddTickerModalProps)
 
       if (data.fxRateMissing) {
         setPendingCompany(companyData)
-        setWarning(`Could not fetch the ${data.currency}/USD FX rate, so market cap could not be converted to USD. You can still add the company and optionally enter market cap manually.`)
+        setWarning(`Could not fetch the ${data.currency}/USD FX rate, so market cap is currently unavailable in USD. You can still add the company and optionally enter market cap manually.`)
         return
       }
 
