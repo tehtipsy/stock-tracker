@@ -61,7 +61,7 @@ export default function AddTickerModal({ onSave, onClose }: AddTickerModalProps)
 
       if (data.fxRateMissing) {
         setPendingCompany(companyData)
-        setWarning(`Couldn't fetch the ${data.currency}/USD FX rate, so market cap could not be converted to USD. You can still add the company and optionally enter market cap manually.`)
+        setWarning(`Could not fetch the ${data.currency}/USD FX rate, so market cap could not be converted to USD. You can still add the company and optionally enter market cap manually.`)
         return
       }
 
