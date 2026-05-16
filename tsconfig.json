@@ -25,5 +25,5 @@
     /* JSX */
     "jsx": "react-jsx"
   },
-  "include": ["src"]
+  "include": ["src", "api"],
 }
