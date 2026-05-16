@@ -13,6 +13,11 @@ export const FTS_PERIOD1 = '2021-01-01'
 const FX_MAX_ATTEMPTS = 2
 const FX_RETRY_DELAY_MS = 400
 
+/** Known mis-marked currency codes returned by the Yahoo Finance API, mapped to the correct ISO 4217 codes. */
+const CURRENCY_ALIASES: Record<string, string> = {
+  ILA: 'ILS', // Yahoo Finance 2 reports Israeli Shekel as "ILA" instead of "ILS"
+}
+
 export interface FinancialData {
   ebit: number | null
   ebitda: number | null
@@ -87,12 +92,13 @@ export function toQuote(
 
 /** Fetch 1 unit of `currency` in USD with 2 direct-pair attempts (`CURRENCYUSD=X`), then 2 inverted-pair attempts (`USDCURRENCY=X`), with 400ms retry delays inside each strategy. */
 export async function fetchUsdRate(currency: string): Promise<number | null> {
-  if (currency === 'USD') return 1
+  const normalised = CURRENCY_ALIASES[currency] ?? currency
+  if (normalised === 'USD') return 1
 
   for (let attempt = 0; attempt < FX_MAX_ATTEMPTS; attempt++) {
     try {
       if (attempt > 0) await new Promise(r => setTimeout(r, FX_RETRY_DELAY_MS))
-      const fx = await yf.quoteSummary(`${currency}USD=X`, { modules: ['price'] })
+      const fx = await yf.quoteSummary(`${normalised}USD=X`, { modules: ['price'] })
       const rate = fx.price?.regularMarketPrice
       if (rate != null && isFinite(rate) && rate > 0) return rate
     } catch {
@@ -103,7 +109,7 @@ export async function fetchUsdRate(currency: string): Promise<number | null> {
   for (let attempt = 0; attempt < FX_MAX_ATTEMPTS; attempt++) {
     try {
       if (attempt > 0) await new Promise(r => setTimeout(r, FX_RETRY_DELAY_MS))
-      const fx = await yf.quoteSummary(`USD${currency}=X`, { modules: ['price'] })
+      const fx = await yf.quoteSummary(`USD${normalised}=X`, { modules: ['price'] })
       const rate = fx.price?.regularMarketPrice
       if (rate != null && isFinite(rate) && rate > 0) return 1 / rate
     } catch {
