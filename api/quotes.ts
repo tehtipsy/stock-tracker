@@ -77,7 +77,7 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
     if (result.status !== 'fulfilled') continue
     const d = result.value
     const currency = d.price?.currency ?? 'USD'
-    let usdRate = fxRates[currency] ?? null
+    let usdRate: number | null = fxRates[currency] ?? null
     if (usdRate == null && currency !== 'USD') {
       usdRate = await fetchUsdRate(currency)
       if (usdRate != null) fxRates[currency] = usdRate
