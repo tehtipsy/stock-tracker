@@ -18,7 +18,8 @@ const DEFAULTS: Defaults = {
     {id:6,ticker:'SXT',name:'Sensient Technologies',segment:'Flavor',currency:'USD',mcap:2400,ev_revenue:1.9,ev_ebitda:12.0,ev_ebit:15.7,pe:17.1,ps:1.5,ev_nopat:null,ebitda_margin:16.1,year:2024},
     {id:7,ticker:'RBT',name:'Robertet',segment:'Fragrance',currency:'EUR',mcap:760,ev_revenue:1.0,ev_ebitda:5.0,ev_ebit:6.4,pe:17.4,ps:0.9,ev_nopat:null,ebitda_margin:19.4,year:2024},
     {id:8,ticker:'4958',name:'T. Hasegawa',segment:'Flavor',currency:'JPY',mcap:830,ev_revenue:1.5,ev_ebitda:10.0,ev_ebit:13.2,pe:18.0,ps:1.4,ev_nopat:null,ebitda_margin:15.0,year:2024},
-    {id:9,ticker:'4914',name:'Takasago',segment:'Fragrance',currency:'JPY',mcap:1380,ev_revenue:1.1,ev_ebitda:9.1,ev_ebit:12.0,pe:14.2,ps:1.0,ev_nopat:null,ebitda_margin:12.2,year:2024},
+    { id: 9, ticker: '4914', name: 'Takasago', segment: 'Fragrance', currency: 'JPY', mcap: 1380, ev_revenue: 1.1, ev_ebitda: 9.1, ev_ebit: 12.0, pe: 14.2, ps: 1.0, ev_nopat: null, ebitda_margin: 12.2, year: 2024 },
+    { id: 10, ticker: 'TRPZ', name: 'Turpaz', segment:'Diversified',currency:'ILA',mcap:1380,ev_revenue:1.1,ev_ebitda:9.1,ev_ebit:12.0,pe:14.2,ps:1.0,ev_nopat:null,ebitda_margin:12.2,year:2024},
   ],
   financials: [
     // IFF FY2024
