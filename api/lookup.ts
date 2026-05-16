@@ -50,10 +50,7 @@ function rawMarketCap(d: QuoteSummaryResult): number | null {
       : null)
 }
 
-function toQuote(d: QuoteSummaryResult, usdRate: number | null, financials: FinancialData): LiveQuote {
-  // Use price.marketCap if available; fall back to price × sharesOutstanding
-  // Both sources are in the security's native currency (absolute value, not millions)
-  const rawMcap = rawMarketCap(d)
+function toQuote(rawMcap: number | null, d: QuoteSummaryResult, usdRate: number | null, financials: FinancialData): LiveQuote {
   const ev = d.defaultKeyStatistics?.enterpriseValue
   const { ebit, ebitda, totalRevenue, taxRate } = financials
   const ev_ebit = ev != null && ebit != null && ebit !== 0 ? round2(ev / ebit) : null
@@ -149,8 +146,9 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
       ? extractFinancials(ftsResult.value)
       : { ebit: null, ebitda: null, totalRevenue: null, taxRate: null }
 
-    const quote = toQuote(d, usdRate, financials)
-    const fxRateMissing = currency !== 'USD' && rawMarketCap(d) != null && usdRate == null
+    const rawMcap = rawMarketCap(d)
+    const quote = toQuote(rawMcap, d, usdRate, financials)
+    const fxRateMissing = currency !== 'USD' && rawMcap != null && usdRate == null
 
     const body: LookupResponse = fxRateMissing
       ? { name, currency, quote, fxRateMissing: true }
