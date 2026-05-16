@@ -70,6 +70,13 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
 
   // Fetch USD exchange rates for all non-USD currencies encountered
   const fxRates = await fetchFxRates([...currencySet])
+  const missingCurrencies = [...currencySet].filter(currency => fxRates[currency] == null)
+  if (missingCurrencies.length) {
+    const fallbackRates = await Promise.all(missingCurrencies.map(async currency => [currency, await fetchUsdRate(currency)] as const))
+    fallbackRates.forEach(([currency, rate]) => {
+      if (rate != null) fxRates[currency] = rate
+    })
+  }
 
   const quotes: Record<string, LiveQuote> = {}
   for (let i = 0; i < entries.length; i++) {
@@ -78,11 +85,7 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
     if (result.status !== 'fulfilled') continue
     const d = result.value
     const currency = d.price?.currency ?? 'USD'
-    let usdRate: number | null = fxRates[currency] ?? null
-    if (usdRate == null && currency !== 'USD') {
-      usdRate = await fetchUsdRate(currency)
-      if (usdRate != null) fxRates[currency] = usdRate
-    }
+    const usdRate: number | null = fxRates[currency] ?? null
     if (usdRate == null) {
       console.warn(`[quotes] No USD rate found for currency "${currency}" (${appTicker}); market cap will be omitted.`)
     }

@@ -85,7 +85,7 @@ export function toQuote(
   }
 }
 
-/** Fetch 1 unit of `currency` in USD using a direct pair first, then an inverted USD pair, retrying each strategy. */
+/** Fetch 1 unit of `currency` in USD with up to 4 total attempts: 2 direct-pair tries, then 2 inverted-pair tries, with 400ms retry delays inside each strategy. */
 export async function fetchUsdRate(currency: string): Promise<number | null> {
   if (currency === 'USD') return 1
 
