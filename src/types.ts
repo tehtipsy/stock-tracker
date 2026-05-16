@@ -56,6 +56,7 @@ export interface LookupResponse {
   name: string
   currency: string
   quote: LiveQuote
+  fxRateMissing?: boolean
 }
 
 // ── Context types ───────────────────────────────────────────────────────────

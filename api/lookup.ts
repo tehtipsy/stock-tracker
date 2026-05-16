@@ -43,14 +43,17 @@ function extractFinancials(rows: FundamentalsTimeSeriesFinancialsResult[]): Fina
   return { ebit: null, ebitda: null, totalRevenue: null, taxRate: null }
 }
 
-function toQuote(d: QuoteSummaryResult, usdRate: number | null, financials: FinancialData): LiveQuote {
-  // Use price.marketCap if available; fall back to price × sharesOutstanding
-  // Both sources are in the security's native currency (absolute value, not millions)
-  const rawMcap =
-    d.price?.marketCap ??
+function rawMarketCap(d: QuoteSummaryResult): number | null {
+  return d.price?.marketCap ??
     (d.price?.regularMarketPrice != null && d.defaultKeyStatistics?.sharesOutstanding != null
       ? d.price.regularMarketPrice * d.defaultKeyStatistics.sharesOutstanding
       : null)
+}
+
+function toQuote(d: QuoteSummaryResult, usdRate: number | null, financials: FinancialData): LiveQuote {
+  // Use price.marketCap if available; fall back to price × sharesOutstanding
+  // Both sources are in the security's native currency (absolute value, not millions)
+  const rawMcap = rawMarketCap(d)
   const ev = d.defaultKeyStatistics?.enterpriseValue
   const { ebit, ebitda, totalRevenue, taxRate } = financials
   const ev_ebit = ev != null && ebit != null && ebit !== 0 ? round2(ev / ebit) : null
@@ -147,8 +150,9 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
       : { ebit: null, ebitda: null, totalRevenue: null, taxRate: null }
 
     const quote = toQuote(d, usdRate, financials)
+    const fxRateMissing = currency !== 'USD' && rawMarketCap(d) != null && usdRate == null
 
-    const body: LookupResponse = { name, currency, quote }
+    const body: LookupResponse = { name, currency, quote, fxRateMissing }
 
     res.writeHead(200, { 'Content-Type': 'application/json' })
     res.end(JSON.stringify(body))
