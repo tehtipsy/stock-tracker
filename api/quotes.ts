@@ -29,15 +29,19 @@ const TICKER_MAP: Record<string, string> = {
 }
 
 /** Fetch 1-unit-of-currency → USD rates for each non-USD currency. */
-async function fetchFxRates(currencies: string[]): Promise<Record<string, number>> {
-  const rates: Record<string, number> = { USD: 1 }
-  const nonUSD = currencies.filter(c => c !== 'USD')
-  if (!nonUSD.length) return rates
+async function populateFxRates(rates: Record<string, number>, currencies: string[]): Promise<void> {
+  const missingCurrencies = currencies.filter(currency => currency !== 'USD' && rates[currency] == null)
+  if (!missingCurrencies.length) return
 
-  const fxResults = await Promise.all(nonUSD.map(async currency => [currency, await fetchUsdRate(currency)] as const))
+  const fxResults = await Promise.all(missingCurrencies.map(async currency => [currency, await fetchUsdRate(currency)] as const))
   fxResults.forEach(([currency, rate]) => {
     if (rate != null) rates[currency] = rate
   })
+}
+
+async function fetchFxRates(currencies: string[]): Promise<Record<string, number>> {
+  const rates: Record<string, number> = { USD: 1 }
+  await populateFxRates(rates, currencies)
   return rates
 }
 
@@ -70,13 +74,7 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
 
   // Fetch USD exchange rates for all non-USD currencies encountered
   const fxRates = await fetchFxRates([...currencySet])
-  const missingCurrencies = [...currencySet].filter(currency => fxRates[currency] == null)
-  if (missingCurrencies.length) {
-    const fallbackRates = await Promise.all(missingCurrencies.map(async currency => [currency, await fetchUsdRate(currency)] as const))
-    fallbackRates.forEach(([currency, rate]) => {
-      if (rate != null) fxRates[currency] = rate
-    })
-  }
+  await populateFxRates(fxRates, [...currencySet])
 
   const quotes: Record<string, LiveQuote> = {}
   for (let i = 0; i < entries.length; i++) {
