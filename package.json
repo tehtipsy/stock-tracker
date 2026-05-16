@@ -14,7 +14,7 @@
     "typecheck": "tsc -p tsconfig.json --noEmit && tsc -p tsconfig.node.json --noEmit"
   },
   "dependencies": {
-    "@tanstack/react-router": "^1.169.1",
+    "@tanstack/react-router": "^1.170.1",
     "react": "^19.2.5",
     "react-dom": "^19.2.5",
     "yahoo-finance2": "^3.14.0"
