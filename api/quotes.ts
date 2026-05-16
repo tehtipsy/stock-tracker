@@ -8,11 +8,13 @@ import { rejectNonGet, sendJson } from './lib/http'
 import {
   EMPTY_FINANCIAL_DATA,
   extractFinancials,
+  fetchUsdRate,
   FTS_PERIOD1,
   MODULES,
   toQuote,
   yf,
 } from './lib/quoteService'
+const FX_REFILL_DELAY_MS = 400
 
 // Map from app ticker → Yahoo Finance symbol
 const TICKER_MAP: Record<string, string> = {
@@ -28,21 +30,19 @@ const TICKER_MAP: Record<string, string> = {
 }
 
 /** Fetch 1-unit-of-currency → USD rates for each non-USD currency. */
+async function populateFxRates(rates: Record<string, number>, currencies: string[]): Promise<void> {
+  const missingCurrencies = currencies.filter(currency => currency !== 'USD' && rates[currency] == null)
+  if (!missingCurrencies.length) return
+
+  const fxResults = await Promise.all(missingCurrencies.map(async currency => [currency, await fetchUsdRate(currency)] as const))
+  fxResults.forEach(([currency, rate]) => {
+    if (rate != null) rates[currency] = rate
+  })
+}
+
 async function fetchFxRates(currencies: string[]): Promise<Record<string, number>> {
   const rates: Record<string, number> = { USD: 1 }
-  const nonUSD = currencies.filter(c => c !== 'USD')
-  if (!nonUSD.length) return rates
-
-  const fxResults = await Promise.allSettled(
-    nonUSD.map(c => yf.quoteSummary(`${c}USD=X`, { modules: ['price'] })),
-  )
-  nonUSD.forEach((currency, i) => {
-    const r = fxResults[i]
-    if (r.status === 'fulfilled') {
-      const rate = r.value.price?.regularMarketPrice
-      if (rate != null && isFinite(rate) && rate > 0) rates[currency] = rate
-    }
-  })
+  await populateFxRates(rates, currencies)
   return rates
 }
 
@@ -75,21 +75,27 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
 
   // Fetch USD exchange rates for all non-USD currencies encountered
   const fxRates = await fetchFxRates([...currencySet])
+  const missingFxCurrencies = [...currencySet].filter(currency => fxRates[currency] == null)
+  if (missingFxCurrencies.length) {
+    await new Promise(r => setTimeout(r, FX_REFILL_DELAY_MS))
+    await populateFxRates(fxRates, missingFxCurrencies)
+  }
 
   const quotes: Record<string, LiveQuote> = {}
-  entries.forEach(([appTicker], i) => {
+  for (let i = 0; i < entries.length; i++) {
+    const [appTicker] = entries[i]
     const result = results[i]
-    if (result.status !== 'fulfilled') return
+    if (result.status !== 'fulfilled') continue
     const d = result.value
     const currency = d.price?.currency ?? 'USD'
-    const usdRate = fxRates[currency]
+    const usdRate: number | null = fxRates[currency] ?? null
     if (usdRate == null) {
       console.warn(`[quotes] No USD rate found for currency "${currency}" (${appTicker}); market cap will be omitted.`)
     }
     const ftsResult = ftsResults[i]
     const financials = ftsResult.status === 'fulfilled' ? extractFinancials(ftsResult.value) : EMPTY_FINANCIAL_DATA
-    quotes[appTicker] = toQuote(d, usdRate ?? null, financials)
-  })
+    quotes[appTicker] = toQuote(d, usdRate, financials)
+  }
 
   const body: QuotesResponse = { quotes, fetchedAt: new Date().toISOString() }
 
