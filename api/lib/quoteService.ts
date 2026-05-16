@@ -85,6 +85,7 @@ export function toQuote(
   }
 }
 
+/** Fetch 1 unit of `currency` in USD using a direct pair first, then an inverted USD pair, retrying each strategy. */
 export async function fetchUsdRate(currency: string): Promise<number | null> {
   if (currency === 'USD') return 1
 

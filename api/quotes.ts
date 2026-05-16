@@ -72,7 +72,8 @@ export default async function handler(req: IncomingMessage, res: ServerResponse)
   const fxRates = await fetchFxRates([...currencySet])
 
   const quotes: Record<string, LiveQuote> = {}
-  for (const [i, [appTicker]] of entries.entries()) {
+  for (let i = 0; i < entries.length; i++) {
+    const [appTicker] = entries[i]
     const result = results[i]
     if (result.status !== 'fulfilled') continue
     const d = result.value
